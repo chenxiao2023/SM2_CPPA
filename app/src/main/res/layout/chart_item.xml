@@ -5,10 +5,9 @@
 
     <TextView
 
-        android:id="@+id/itemtimeleft"
+        android:id="@+id/itemtimeright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/itemleft"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:gravity="center"
@@ -20,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
@@ -31,7 +30,7 @@
         android:id="@+id/itemsignleft"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/itemright"
+        android:layout_below="@+id/itemleft"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:gravity="center"
@@ -40,10 +39,9 @@
 
     <TextView
 
-        android:id="@+id/itemtimeright"
+        android:id="@+id/itemtimeleft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/itemleft"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:gravity="center"
@@ -71,6 +69,9 @@
         android:layout_alignParentEnd="true"
         android:gravity="center"
         android:textColor="#A7A9AA"/>
+
+
+
 
     <ImageView
         android:id="@+id/rightimg"

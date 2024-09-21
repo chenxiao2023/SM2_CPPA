@@ -560,7 +560,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
-
                     holder.rightimg.setVisibility(View.GONE);
                     holder.rightimgtime.setVisibility(View.GONE);
 
@@ -605,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    holder.rightsign.setText(mi.getSignature());
+                    holder.leftsign.setText(mi.getSignature());
                 }
             }
             return view;
