@@ -87,14 +87,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 2021.02.17
      */
 
-    @Override
+    @Override//实现了一个 Android Activity 的初始化逻辑
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();//隐藏标题栏
         applypermission();
         InitView();
-        handler = new Handler(){
+        handler = new Handler(){//Handler 可以用来在不同线程之间发送和处理消息，更新 UI 等
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if(msg.what == 1){
@@ -211,9 +211,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return ;
                     }
                     long Ltimes = System.currentTimeMillis();
+                    String signature="暂时签名";
                     message = sendmsgtext.getText().toString();
-                    datas.add(new MessageInfor(message,Ltimes,mID,"1"));
-                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
+                    datas.add(new MessageInfor(message,Ltimes,mID,signature,"1"));
+                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"signature\":\""+signature+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
 
 
@@ -261,8 +262,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
     //服务器初始化
     public void ServerInit() {
         try {
@@ -276,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Runnable() {
                     @Override
                     public void run() {
+                        // 无限循环监听客户端连接，所以才要整一个新线程来防止阻碍主线程
                         while(true) {
                             Socket socket1 = null;
                             try {
@@ -284,7 +284,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
+                            // 当有客户端连接时，创建一个新的ClientHandler实例来处理该客户端
                             ClientHandler hander = new ClientHandler(socket1);
+
+                            // 为每个客户端启动一个新线程来执行ClientHandler
                             Thread t = new Thread(hander);
                             t.start();
                         }
@@ -332,12 +335,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String message = null;
                 while((message = br.readLine())!=null) {
 
-                    try {
+                    try {//接收到客户端发送的消息后，使用 JSONObject 解析消息。
                         JSONObject json = new  JSONObject(message);
                         if(json.getString("isimg").equals("1")){//不为图片
-                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),"1"));
+                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"1"));
                         }else if(json.getString("isimg").equals("0")){//为图片
-                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),"0"));
+                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"0"));
                         }
                         titletext = json.getString("peoplen");
                         handler.sendEmptyMessage(1);
@@ -346,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         e.printStackTrace();
                     }
 
+                    //将解析后的消息广播给所有客户端
                     sendMessage(message);
                 }
 
@@ -353,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }finally {
-                //将该客户端的输出流从共享集合中删除
+                //将该客户端的输出流从共享集合中删除，以避免后续广播给已断开的客户端
                 removeOut(pw);
 
                 //有用户退出
@@ -455,9 +459,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         JSONObject json = new  JSONObject(message1);
                         if(json.getLong("id") != mID){
                             if(json.getString("isimg").equals("1")){//不为图片
-                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),"1"));
+                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"1"));
                             }else if(json.getString("isimg").equals("0")){//为图片
-                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),"0"));
+                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"0"));
                             }
                         }
                         titletext = json.getString("peoplen");
@@ -485,8 +489,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return ;
         }
         long Ltimes = System.currentTimeMillis();
-        MessageInfor m = new MessageInfor(message,Ltimes,mID,"1");//消息 时间戳 id
-        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\"}";
+        String signature="暂时签名";
+        MessageInfor m = new MessageInfor(message,Ltimes,mID,signature,"1");//消息 时间戳 id
+        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}";
         datas.add(m);
         messageAdapte.notifyDataSetChanged();//通知数据源发生变化
 
@@ -519,6 +524,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder = new MessageHolder();
                 holder.left = (TextView) view.findViewById(R.id.itemleft);
                 holder.right = (TextView) view.findViewById(R.id.itemright);
+
+                holder.leftsign = (TextView) view.findViewById(R.id.itemsignleft);
+                holder.rightsign = (TextView) view.findViewById(R.id.itemsignright);
                 holder.lefttime = (TextView) view.findViewById(R.id.itemtimeleft);
                 holder.righttime = (TextView) view.findViewById(R.id.itemtimeright);
 
@@ -537,8 +545,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(mi.getType().equals("0")){//图片
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
+
                     holder.rightimg.setVisibility(View.VISIBLE);
                     holder.rightimgtime.setVisibility(View.VISIBLE);
+
                     holder.rightimg.setImageBitmap(convertStringToIcon(mi.getMsg()));
                     holder.rightimgtime.setText(simpleDateFormat.format(new Date(mi.getTime())));
 
@@ -550,19 +560,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
+
                     holder.rightimg.setVisibility(View.GONE);
                     holder.rightimgtime.setVisibility(View.GONE);
 
+
                     holder.left.setVisibility(View.GONE);
                     holder.lefttime.setVisibility(View.GONE);
+                    holder.leftsign.setVisibility(View.GONE);
                     holder.right.setVisibility(View.VISIBLE);
                     holder.righttime.setVisibility(View.VISIBLE);
+                    holder.rightsign.setVisibility(View.VISIBLE);
                     holder.right.setText(mi.getMsg());
                     holder.righttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
+                    holder.rightsign.setText(mi.getSignature());
                 }
 
 
-            }else {
+            }else {//对面发的
                 if(mi.getType().equals("0")){//图片
                     holder.leftimg.setVisibility(View.VISIBLE);
                     holder.leftimgtime.setVisibility(View.VISIBLE);
@@ -584,10 +599,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     holder.left.setVisibility(View.VISIBLE);
                     holder.lefttime.setVisibility(View.VISIBLE);
+                    holder.leftsign.setVisibility(View.VISIBLE);
                     holder.right.setVisibility(View.GONE);
                     holder.righttime.setVisibility(View.GONE);
+                    holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
+                    holder.rightsign.setText(mi.getSignature());
                 }
             }
             return view;
@@ -599,15 +617,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public TextView right;
         public TextView lefttime;
         public TextView righttime;
+        public TextView leftsign;
+        public TextView rightsign;
+
+
+
         private TextView rightimgtime;
         private TextView leftimgtime;
         private ImageView rightimg;
         private ImageView leftimg;
 
     }
-
+    //获取图片路径
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        //获取图片路径
+
 
         if (requestCode == IMAGE && resultCode == Activity.RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
@@ -636,12 +659,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         long Ltimes = System.currentTimeMillis();
         String imgString = convertIconToString(bm);
         imgString = imgString.replace("\n","");
-        datas.add(new MessageInfor(imgString,Ltimes,mID,"0"));
+        String signature="暂时签名" ;
+        datas.add(new MessageInfor(imgString,Ltimes,mID,signature,"0"));
 
         if(isServer){//服务器
-            sendMessage("{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\"}");
+            sendMessage("{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}");
         }else {//客户端
-            userSendMsg = "{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\"}";
+            userSendMsg = "{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}";
         }
 
 

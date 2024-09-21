@@ -4,15 +4,18 @@ public class MessageInfor {
     private String msg;
     private Long time;
     private Long userID;
+    private String type;
+    private String signature;
     /**
      * 作者 LinOwl
      * 2021.02.17
      */
-    public MessageInfor(String msg, Long time, Long userID, String type) {
+    public MessageInfor(String msg, Long time, Long userID, String signature,String type) {
         this.msg = msg;
         this.time = time;
         this.userID = userID;
         this.type = type;
+        this.signature=signature;
     }
 
     public int getID() {
@@ -43,6 +46,13 @@ public class MessageInfor {
         return userID;
     }
 
+    //添加了签名
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getSignature() {return signature;}
+
     public void setUserID(Long userID) {
         this.userID = userID;
     }
@@ -55,7 +65,7 @@ public class MessageInfor {
         this.type = type;
     }
 
-    private String type;
+
 
 
 }

@@ -4,17 +4,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/itemleft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/item_left"
-        android:gravity="center" />
 
-    <TextView
         android:id="@+id/itemtimeleft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,6 +13,42 @@
         android:layout_alignParentEnd="true"
         android:gravity="center"
         android:textColor="#A7A9AA"/>
+
+
+    <TextView
+        android:id="@+id/itemleft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/item_left" />
+
+    <TextView
+        android:id="@+id/itemsignleft"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/itemright"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:gravity="center"
+        android:textColor="#A7A9AA"/>
+
+
+    <TextView
+
+        android:id="@+id/itemtimeright"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/itemleft"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:gravity="center"
+        android:textColor="#A7A9AA"/>
+
 
     <TextView
         android:id="@+id/itemright"
@@ -37,7 +63,7 @@
         android:background="@drawable/item_right" />
 
     <TextView
-        android:id="@+id/itemtimeright"
+        android:id="@+id/itemsignright"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/itemright"
