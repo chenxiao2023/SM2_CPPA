@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.bouncycastle.util.Bytes;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -48,8 +50,11 @@ import java.net.Socket;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+
+import cn.mtjsoft.lib_encryption.SM2.SM2Util;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -74,6 +79,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static Socket socket = null;//用于与服务端通信的Socket
     private static ServerSocket server;
     private static List<PrintWriter> allOut; //存放所有客户端的输出流的集合，用于广播
+
+    //SM2参数
+    private byte[] publicKeySM2 = new byte[0];
+    private byte[] privateKeySM2 = new byte[0];
+    private byte[] sign  = new byte[0];
+    private Boolean verifySign  = false;
 
     private static final int IMAGE = 1;//调用系统相册-选择图片
     private static String[] PERMISSIONS_STORAGE = {
@@ -105,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 super.handleMessage(msg);
             }
         };
+
+        //SM2的初始化
+        byte[][] key = SM2Util.generateKeyPair();
+        publicKeySM2 = key[0];
+        privateKeySM2 = key[1];
 
     }
 
@@ -211,10 +227,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return ;
                     }
                     long Ltimes = System.currentTimeMillis();
-                    String signature="暂时签名";
+                    //String signature="暂时签名";
+                    String TxID="到时候再去区块链取";
+                    sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+                    verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
+                    Log.d("发送消息时","sign="+ Arrays.toString(sign));
+                    Log.d("发送消息时","verifySign="+verifySign);
+                    //signature=sign.toString();
                     message = sendmsgtext.getText().toString();
-                    datas.add(new MessageInfor(message,Ltimes,mID,signature,"1"));
-                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"signature\":\""+signature+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
+                    String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
+                    String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
+                    datas.add(new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1"));
+                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
 
 
@@ -337,10 +361,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     try {//接收到客户端发送的消息后，使用 JSONObject 解析消息。
                         JSONObject json = new  JSONObject(message);
+                        String base64PublicKey = json.getString("base64PublicKey"); // 获取 Base64 编码的字符串
+                        String base64Signature = json.getString("base64Signature"); // 获取 Base64 编码的字符串
                         if(json.getString("isimg").equals("1")){//不为图片
-                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"1"));
+                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
                         }else if(json.getString("isimg").equals("0")){//为图片
-                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"0"));
+                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"0"));
                         }
                         titletext = json.getString("peoplen");
                         handler.sendEmptyMessage(1);
@@ -458,10 +484,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     try {
                         JSONObject json = new  JSONObject(message1);
                         if(json.getLong("id") != mID){
+                            String base64PublicKey = json.getString("base64PublicKey"); // 获取 Base64 编码的字符串
+                            String base64Signature = json.getString("base64Signature"); // 获取 Base64 编码的字符串
                             if(json.getString("isimg").equals("1")){//不为图片
-                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"1"));
+                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
                             }else if(json.getString("isimg").equals("0")){//为图片
-                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),String.valueOf(json.getString("signature")),"0"));
+                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"0"));
                             }
                         }
                         titletext = json.getString("peoplen");
@@ -489,9 +517,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return ;
         }
         long Ltimes = System.currentTimeMillis();
-        String signature="暂时签名";
-        MessageInfor m = new MessageInfor(message,Ltimes,mID,signature,"1");//消息 时间戳 id
-        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}";
+       // String signature="暂时签名";
+        String TxID="到时候再去区块链取";
+        sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+        verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
+        Log.d("客户端发消息","sign="+ Arrays.toString(sign));
+        Log.d("客户端发消息","verifySign="+verifySign);
+       // signature=sign.toString();
+        MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1");//消息 时间戳 id
+        String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
+        String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
+        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"id\":\""+mID+"\"}";
         datas.add(m);
         messageAdapte.notifyDataSetChanged();//通知数据源发生变化
 
@@ -540,6 +576,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder = (MessageHolder) view.getTag();
             }
             MessageInfor mi = getItem(i);
+          /*  boolean isok=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
+            Log.d("sss","isok="+isok);*/
+            //verifySign=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime().toString()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
+            verifySign=SM2Util.verifySign(mi.getPublicKey(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature());
+            Log.d("接收","verifySign="+verifySign);
+            Log.d("接收","mi.getPublicKey()="+ Arrays.toString(mi.getPublicKey()));
+            Log.d("接收","mi.getSign()="+ Arrays.toString(mi.getSignature()));
             //显示
             if (mi.getUserID() == mID){//id相等
                 if(mi.getType().equals("0")){//图片
@@ -572,7 +615,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.VISIBLE);
                     holder.right.setText(mi.getMsg());
                     holder.righttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    holder.rightsign.setText(mi.getSignature());
+                    holder.rightsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID());
+
                 }
 
 
@@ -604,7 +648,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    holder.leftsign.setText(mi.getSignature());
+                    holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
+
+                   // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
+
                 }
             }
             return view;
@@ -659,7 +706,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String imgString = convertIconToString(bm);
         imgString = imgString.replace("\n","");
         String signature="暂时签名" ;
-        datas.add(new MessageInfor(imgString,Ltimes,mID,signature,"0"));
+        String TxID="到时候再去区块链取";
+        sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+        Log.d("ccc","sign="+sign);
+        signature=sign.toString();
+        Log.d("ccc","signature="+signature);
+        datas.add(new MessageInfor(imgString,Ltimes,mID,sign,publicKeySM2,TxID,"0"));
 
         if(isServer){//服务器
             sendMessage("{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}");
