@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cn.mtjsoft.lib_encryption.SM2.SM2Util;
+import cn.mtjsoft.lib_encryption.utils.Util;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -93,10 +95,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
-    /**
-     * 作者 LinOwl
-     * 2021.02.17
-     */
 
     @Override//实现了一个 Android Activity 的初始化逻辑
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,9 +228,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //String signature="暂时签名";
                     String TxID="到时候再去区块链取";
                     sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
-                    verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
-                    Log.d("发送消息时","sign="+ Arrays.toString(sign));
-                    Log.d("发送消息时","verifySign="+verifySign);
+                 //   verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
+                    Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
+                  //  Log.d("发送消息时","verifySign="+verifySign);
                     //signature=sign.toString();
                     message = sendmsgtext.getText().toString();
                     String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
@@ -480,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BufferedReader br = new BufferedReader(isr);
                 String message1=br.readLine();
                 while(message1!=null) {
-                    Log.i("测试4",message1);
+                  //  Log.i("测试4",message1);
                     try {
                         JSONObject json = new  JSONObject(message1);
                         if(json.getLong("id") != mID){
@@ -520,9 +518,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        // String signature="暂时签名";
         String TxID="到时候再去区块链取";
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
-        verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
-        Log.d("客户端发消息","sign="+ Arrays.toString(sign));
-        Log.d("客户端发消息","verifySign="+verifySign);
+       //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
+        Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
+       // Log.d("客户端发消息","verifySign="+verifySign);
        // signature=sign.toString();
         MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1");//消息 时间戳 id
         String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
@@ -581,10 +579,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //verifySign=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime().toString()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
             verifySign=SM2Util.verifySign(mi.getPublicKey(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature());
             Log.d("接收","verifySign="+verifySign);
-            Log.d("接收","mi.getPublicKey()="+ Arrays.toString(mi.getPublicKey()));
-            Log.d("接收","mi.getSign()="+ Arrays.toString(mi.getSignature()));
+            Log.d("接收","mi.getPublicKey()="+ Util.byte2HexStr(mi.getPublicKey()));
+            Log.d("接收","mi.getSign()="+ Util.byte2HexStr(mi.getSignature()));
             //显示
-            if (mi.getUserID() == mID){//id相等
+            if (mi.getUserID() == mID){//id相等,自己发的
                 if(mi.getType().equals("0")){//图片
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
@@ -615,7 +613,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.VISIBLE);
                     holder.right.setText(mi.getMsg());
                     holder.righttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    holder.rightsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID());
+                   // holder.rightsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID());
 
                 }
 
@@ -648,7 +646,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
+                    if(verifySign){
+                        holder.leftsign.setText("签名通过");
+                        holder.leftsign.setTextColor(Color.GREEN);
+                    }else {
+                        holder.leftsign.setText("签名不通过");
+                        holder.leftsign.setTextColor(Color.RED);
+                    }
+                  //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
 
                    // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
 
