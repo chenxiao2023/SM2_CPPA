@@ -1,5 +1,7 @@
 package com.example.socketlw;
 
+
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.bouncycastle.util.Bytes;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -57,6 +60,20 @@ import java.util.Locale;
 
 import cn.mtjsoft.lib_encryption.SM2.SM2Util;
 import cn.mtjsoft.lib_encryption.utils.Util;
+
+//http请求用的
+import android.os.Bundle;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -87,6 +104,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] privateKeySM2 = new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
+    private String TxID="";
+
+    //http参数
+    //签名方取TxID
+    private  String urlTxID = "http://192.168.198.20:8080/mapget";
+    //验证方取证书
+    private  String urlTxID2Sij = "https://jsonplaceholder.typicode.com/todos/1";
+    private String address = "your_address_value";
+    private String sk = "your_sk_value";
+
+    private static final String URL = "http://192.168.198.20:8545";
+    private static final String TAG = "VolleyRequest";
 
     private static final int IMAGE = 1;//调用系统相册-选择图片
     private static String[] PERMISSIONS_STORAGE = {
@@ -226,7 +255,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     long Ltimes = System.currentTimeMillis();
                     //String signature="暂时签名";
-                    String TxID="到时候再去区块链取";
+                    TxID="到时候再去区块链取";
+                    sk=Util.byte2HexStr(privateKeySM2);
+                    sendRequest(urlTxID, address, sk);
+                    sendPostRequest();
+
                     sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
                  //   verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
@@ -516,7 +549,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         long Ltimes = System.currentTimeMillis();
        // String signature="暂时签名";
-        String TxID="到时候再去区块链取";
+        TxID="到时候再去区块链取";
+        sk=Util.byte2HexStr(privateKeySM2);
+        sendRequest(urlTxID, address, sk);
+        sendPostRequest();
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
        //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
@@ -578,9 +614,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("sss","isok="+isok);*/
             //verifySign=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime().toString()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
             verifySign=SM2Util.verifySign(mi.getPublicKey(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature());
-            Log.d("接收","verifySign="+verifySign);
-            Log.d("接收","mi.getPublicKey()="+ Util.byte2HexStr(mi.getPublicKey()));
-            Log.d("接收","mi.getSign()="+ Util.byte2HexStr(mi.getSignature()));
+            Log.d("测试6","verifySign="+verifySign);
+            Log.d("测试6","公钥为："+ Util.byte2HexStr(mi.getPublicKey()));
+            Log.d("测试6","数据为："+ mi.getMsg()+mi.getTime()+mi.getTxID());
+            Log.d("测试6","签名为："+ Util.byte2HexStr(mi.getSignature()));
             //显示
             if (mi.getUserID() == mID){//id相等,自己发的
                 if(mi.getType().equals("0")){//图片
@@ -613,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.VISIBLE);
                     holder.right.setText(mi.getMsg());
                     holder.righttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                   // holder.rightsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID());
+                    holder.rightsign.setText("签名："+Util.byte2HexStr(mi.getSignature())+",公钥："+Util.byte2HexStr(mi.getPublicKey())+",标识："+mi.getTxID());
 
                 }
 
@@ -647,10 +684,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
                     if(verifySign){
-                        holder.leftsign.setText("签名通过");
+                        holder.leftsign.setText("签名通过"+",标识："+mi.getTxID());
                         holder.leftsign.setTextColor(Color.GREEN);
                     }else {
-                        holder.leftsign.setText("签名不通过");
+                        holder.leftsign.setText("签名不通过"+",标识："+mi.getTxID());
                         holder.leftsign.setTextColor(Color.RED);
                     }
                   //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
@@ -711,7 +748,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String imgString = convertIconToString(bm);
         imgString = imgString.replace("\n","");
         String signature="暂时签名" ;
-        String TxID="到时候再去区块链取";
+        TxID="到时候再去区块链取";
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
         Log.d("ccc","sign="+sign);
         signature=sign.toString();
@@ -726,7 +763,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-
 
     /**
      * 图片转成string
@@ -800,7 +836,93 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return scalingN;
     }
 
+    private void sendRequest(String url, final String address, final String sk) {
+        RequestQueue queue = Volley.newRequestQueue(this);
 
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // 假设服务器返回一个含有TXID的JSON字符串
+                        // 解析 response 获取 TXID
+                        // 这里假设服务器返回的 response 是 {"TXID": "some_tx_id"}
+                       // TxID = parseTXIDFromResponse(response);
+                        // 直接将响应的字符串作为 TXID
+                        TxID = response;
+                        Toast.makeText(MainActivity.this, "请求成功: TXID = " + TxID, Toast.LENGTH_SHORT).show();
+                        Log.d("测试6","TXID = " + TxID);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d("ppp",error.getMessage());
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("address", address);
+                params.put("sk", sk);
+                return params;
+            }
+        };
+
+        queue.add(stringRequest);
+    }
+
+//这个函数用来整post，从txid得到证书
+private void sendPostRequest() {
+    // 创建请求队列
+    RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+    // 创建 JSON 对象
+    JSONObject jsonRequest = new JSONObject();
+    try {
+        jsonRequest.put("jsonrpc", "2.0");
+        jsonRequest.put("method", "getTransactionByHash");
+        jsonRequest.put("params", new JSONArray().put(1).put("0x3050e1bfdee3515980ad30ad24205fbaeda4a07209c717bc768e77a555d33087"));
+        jsonRequest.put("id", 1);
+    } catch (JSONException e) {
+        e.printStackTrace();
+    }
+
+    // 创建 POST 请求
+    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+            Request.Method.POST,
+            URL,
+            jsonRequest,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    // 处理响应
+                    Log.d(TAG, "Response: " + response.toString());
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // 处理错误
+                    Log.e(TAG, "Error: " + error.toString());
+                }
+            }
+    );
+
+    // 将请求添加到队列中
+    requestQueue.add(jsonObjectRequest);
+}
+
+    private String parseTXIDFromResponse(String response) {
+        // 简单解析 TXID，可根据实际情况更改
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            return jsonObject.optString("title");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
 
