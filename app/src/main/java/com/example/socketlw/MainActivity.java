@@ -115,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private  String urlTxID =     "http://192.168.198.20:8080/postmapget";
     private  String urlPostaddr = "http://192.168.198.20:8080/postaddr";
 
+    private  String urlTxID2PublicKey = "http://192.168.198.20:8080/getpublickey";
+
+
     private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
     private String sk = "your_sk_value";
 
@@ -152,7 +155,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
         privateKeySM2 = key[1];
+       //postTwo(urlUpdatePK,"TxID","address",address,"key",Util.byte2HexStr(publicKeySM2));
+        //一进来就获取TxID
+        postOne(urlTxID,"TxID","address",address);
 
+        Toast.makeText(MainActivity.this,"服务器获取TxID:"+TxID,Toast.LENGTH_LONG).show();
+        Log.d("服务器获取TxID:",TxID);
     }
 
     /**
@@ -165,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startserver = (Button) findViewById(R.id.startserver);
         continueserver = (Button) findViewById(R.id.continueserver);
         sendmsgbt = (Button) findViewById(R.id.sendmsgbt);
-        sendimg = (Button) findViewById(R.id.sendimg);
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         messageAdapte = new MessageAdapte();
@@ -174,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startserver.setOnClickListener(this);
         continueserver.setOnClickListener(this);
         sendmsgbt.setOnClickListener(this);
-        sendimg.setOnClickListener(this);
+       // sendimg.setOnClickListener(this);
 
     }
 
@@ -259,9 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     long Ltimes = System.currentTimeMillis();
                     //String signature="暂时签名";
-                    TxID="到时候再去区块链取";
+                    //TxID="到时候再去区块链取";
                     sk=Util.byte2HexStr(privateKeySM2);
-                    postmapget(urlTxID, address);
+
                    // sendPostRequest();
 
                     sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
@@ -283,11 +290,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
 
-                break;
-            case R.id.sendimg:
-                //调用相册
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, IMAGE);
                 break;
         }
     }
@@ -528,7 +530,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                         titletext = json.getString("peoplen");
+                        TxID=json.getString("TxID");
                         handler.sendEmptyMessage(1);
+                        postOne(urlTxID2PublicKey,"pk","txid",TxID);
+                        Log.d("接收从服务端的TxID后，获取公钥：",Util.byte2HexStr(publicKeySM2));
                        /* Log.d("接收消息后更新公钥","已更新公钥");
                         updatepk(urlUpdatePK,address);
                         Log.d("更新公钥后获取txid","TxID="+TxID   );*/
@@ -558,13 +563,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        // String signature="暂时签名";
       //  TxID="到时候再去区块链取";
         sk=Util.byte2HexStr(privateKeySM2);
-       // postmapget(urlTxID, address);
-      //  postmapget(urlPostaddr, address);
+
+
        // Log.d("接收消息后更新公钥","已更新公钥");
        //updatepk(urlUpdatePK,address);
-        postmapget(urlUpdatePK,address);
-        Log.d("更新公钥后获取txid","TxID="+TxID   );
+
+        postOne(urlTxID,"TxID","address",address);//从Address得到txID
+        Toast.makeText(MainActivity.this,"客户端获取TxID:"+TxID,Toast.LENGTH_LONG).show();
+        Log.d("客户端获取TxID:",TxID);
        // sendPostRequest();
+
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
        //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
@@ -728,66 +736,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         private ImageView leftimg;
 
     }
-    //获取图片路径
-    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
 
 
-        if (requestCode == IMAGE && resultCode == Activity.RESULT_OK && data != null) {
-            Uri selectedImage = data.getData();
-            String[] filePathColumns = {MediaStore.Images.Media.DATA};
-            Cursor c = getContentResolver().query(selectedImage, filePathColumns, null, null, null);
-            c.moveToFirst();
-            int columnIndex = c.getColumnIndex(filePathColumns[0]);
-
-            String imagePath = c.getString(columnIndex);
-
-            activityImage(imagePath);
-            c.close();
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 
 
-    /**
-     * 处理图片发送
-     * @param imaePath 图片路径
-     */
-    private void activityImage(String imaePath){
-
-        Bitmap bm = BitmapFactory.decodeFile(imaePath);
-        bm =  resizeBitmap(bm,400,400,true);
-        long Ltimes = System.currentTimeMillis();
-        String imgString = convertIconToString(bm);
-        imgString = imgString.replace("\n","");
-        String signature="暂时签名" ;
-        TxID="到时候再去区块链取";
-        sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
-        Log.d("ccc","sign="+sign);
-        signature=sign.toString();
-        Log.d("ccc","signature="+signature);
-        datas.add(new MessageInfor(imgString,Ltimes,mID,sign,publicKeySM2,TxID,"0"));
-
-        if(isServer){//服务器
-            sendMessage("{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}");
-        }else {//客户端
-            userSendMsg = "{\"isimg\":\"0\",\"msg\":\""+imgString+"\",\"times\":\""+Ltimes+"\",\"signature\":\""+signature+"\",\"id\":\""+mID+"\"}";
-        }
 
 
-    }
-
-    /**
-     * 图片转成string
-     * @param bitmap
-     * @return
-     */
-    private String convertIconToString(Bitmap bitmap){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();// outputstream
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] appicon = baos.toByteArray();// 转为byte数组
-        return Base64.encodeToString(appicon, Base64.DEFAULT);
-
-    }
 
     /**
      * string转成bitmap
@@ -809,46 +763,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * 处理图片
-     * @param bitmap 图片bitmap
-     * @param MaxWidth 最大长
-     * @param MaxHeight 最大宽
-     * @param filter 是否过滤
-     * @return 处理后的bitmap
-     */
-    private Bitmap resizeBitmap(Bitmap bitmap,int MaxWidth,int MaxHeight,boolean filter){
-        Float ScalingNumber;
-        Bitmap reBitmap;
-        Matrix matrix = new Matrix();
-        ScalingNumber = Float.valueOf(scalingNumber(bitmap.getWidth(),bitmap.getHeight(),MaxWidth,MaxHeight));
-        matrix.setScale(1/ScalingNumber, 1/ScalingNumber);
-        reBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),bitmap.getHeight(), matrix, filter);
 
-        return reBitmap;
-    }
 
-    /**
-     * 计算缩放比例
-     * @param oldWidth 原长
-     * @param oldHeight 原宽
-     * @param MaxWidth 最大长
-     * @param MaxHeight 最大宽
-     * @return 缩放比系数
-     */
-    private int scalingNumber(int oldWidth,int oldHeight,int MaxWidth,int MaxHeight){
-        int scalingN = 1;
-        if(oldWidth > MaxWidth || oldHeight > MaxHeight){
-            scalingN = 2;
-            while((oldWidth/scalingN > MaxWidth) || (oldHeight/scalingN > MaxHeight)){
-                scalingN*=2;
-            }
-        }
-
-        return scalingN;
-    }
-
-    private void postmapget(String url, final String address) {
+    private void postTwo(String url,String res,final String key1 ,final String value1,final String key2 ,final String value2) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         // 在函数内部生成 JSON 对象
@@ -856,7 +773,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         try {
             // 添加键值对到 JSON 对象
-            jsonObject.put("address", address);
+            jsonObject.put(key1, value1);
+            jsonObject.put(key2, value2);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -868,9 +786,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onResponse(String response) {
                         // 假设服务器返回一个含有TXID的JSON字符串
                         // 直接将响应的字符串作为 TXID
-                        TxID = response;
-                        Toast.makeText(MainActivity.this, "请求成功: TXID = " + TxID, Toast.LENGTH_SHORT).show();
-                        Log.d("测试6", "TXID = " + TxID);
+                        switch (res) {
+                            case "TxID":
+                                TxID=response;
+                                break;
+                            case "pk":
+                                publicKeySM2=response.getBytes();
+                                break;
+                            default:
+                        }
+
+                        Toast.makeText(MainActivity.this, "请求成功: response = " + response, Toast.LENGTH_SHORT).show();
+                        Log.d("测试6", "response = " + response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -895,145 +822,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         queue.add(jsonRequest);
     }
 
-//这个函数用来整post，从txid得到证书
-private void sendPostRequest() {
-    // 创建请求队列
-    RequestQueue requestQueue = Volley.newRequestQueue(this);
+//传1个参数
+private void postOne(String url,String res,final String key ,final String value) {
+    RequestQueue queue = Volley.newRequestQueue(this);
 
-    // 创建 JSON 对象
-    JSONObject jsonRequest = new JSONObject();
+    // 在函数内部生成 JSON 对象
+    JSONObject jsonObject = new JSONObject();
+
     try {
-        jsonRequest.put("jsonrpc", "2.0");
-        jsonRequest.put("method", "getTransactionByHash");
-        jsonRequest.put("params", new JSONArray().put(1).put("0x3050e1bfdee3515980ad30ad24205fbaeda4a07209c717bc768e77a555d33087"));
-        jsonRequest.put("id", 1);
+        // 添加键值对到 JSON 对象
+        jsonObject.put(key, value);
+
     } catch (JSONException e) {
         e.printStackTrace();
     }
 
-    // 创建 POST 请求
-    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-            Request.Method.POST,
-            URL,
-            jsonRequest,
-            new Response.Listener<JSONObject>() {
+    StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
+            new Response.Listener<String>() {
                 @Override
-                public void onResponse(JSONObject response) {
-                    // 处理响应
-                    Log.d(TAG, "Response: " + response.toString());
+                public void onResponse(String response) {
+                    // 假设服务器返回一个含有TXID的JSON字符串
+                    // 直接将响应的字符串作为 TXID
+                    switch (res) {
+                        case "TxID":
+                            TxID=response;
+                            Toast.makeText(MainActivity.this, "请求成功: TXID = " + TxID, Toast.LENGTH_SHORT).show();
+                            Log.d("测试PostOne", "url = " + url);
+                            Log.d("测试PostOne", "TXID = " + TxID);
+                            break;
+                        case "pk":
+                            publicKeySM2=response.getBytes();
+                            Toast.makeText(MainActivity.this, "请求成功: publicKeySM2 = " + Util.byte2HexStr(publicKeySM2), Toast.LENGTH_SHORT).show();
+                            Log.d("测试PostOne","传递的TxID是"+value);
+                            Log.d("测试PostOne", "url = " + url);
+                            Log.d("测试PostOne", "publicKeySM2 = " + Util.byte2HexStr(publicKeySM2));
+                            Log.d("测试PostOne,直接输出的公钥：",response);
+                            break;
+                        default:
+                    }
+
+                    Log.d("测试PostOne", "执行成功");
+
                 }
             },
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // 处理错误
-                    Log.e(TAG, "Error: " + error.toString());
+                    Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d("ppp", error.getMessage());
                 }
-            }
-    );
+            }) {
+        @Override
+        public byte[] getBody() {
+            // 返回 JSON 格式的请求体
+            return jsonObject.toString().getBytes();
+        }
 
-    // 将请求添加到队列中
-    requestQueue.add(jsonObjectRequest);
+        @Override
+        public String getBodyContentType() {
+            return "application/json; charset=utf-8";
+        }
+    };
+
+    queue.add(jsonRequest);
 }
 
 
-    private void updatepk(String url, final String address) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        // 在函数内部生成 JSON 对象
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            // 添加键值对到 JSON 对象
-            jsonObject.put("address", address);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // 假设服务器返回一个含有TXID的JSON字符串
-                        // 直接将响应的字符串作为 TXID
-                        TxID = response;
-                        Toast.makeText(MainActivity.this, "请求成功: TXID = " + TxID, Toast.LENGTH_SHORT).show();
-                        Log.d("测试777", "TXID = " + TxID);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d("ppp", error.getMessage());
-                    }
-                }) {
-            @Override
-            public byte[] getBody() {
-                // 返回 JSON 格式的请求体
-                return jsonObject.toString().getBytes();
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
-        };
-
-        queue.add(jsonRequest);
-    }
 
 
-    private String parseTXIDFromResponse(String response) {
-        // 简单解析 TXID，可根据实际情况更改
-        try {
-            JSONObject jsonObject = new JSONObject(response);
-            return jsonObject.optString("title");
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    //这个函数用来更新公钥
-    private void sendPostUpdatePK() {
-        // 创建请求队列
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-
-        // 创建 JSON 对象
-        JSONObject jsonRequest = new JSONObject();
-        try {
-            jsonRequest.put("address", "0x4f4072fc87a0833ea924f364e8a2af3546f71279");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // 创建 POST 请求
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.POST,
-                URL,
-                jsonRequest,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // 处理响应
-                        Log.d(TAG, "Response: " + response.toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // 处理错误
-                        Log.e(TAG, "Error: " + error.toString());
-                    }
-                }
-        );
-
-        // 将请求添加到队列中
-        requestQueue.add(jsonObjectRequest);
-    }
 
 
 }

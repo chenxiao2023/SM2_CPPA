@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="ipv4"
-        android:text="10.92.29.20"
+        android:text="10.52.103.106"
         android:gravity="center"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"

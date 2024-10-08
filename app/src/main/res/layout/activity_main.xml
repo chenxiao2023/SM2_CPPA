@@ -63,12 +63,6 @@
             android:layout_weight="1"
             android:text="发送" />
 
-        <Button
-            android:id="@+id/sendimg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="发送图片" />
     </LinearLayout>
 
     <ListView
