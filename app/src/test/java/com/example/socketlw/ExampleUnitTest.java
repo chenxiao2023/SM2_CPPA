@@ -6,8 +6,11 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.SM3Digest;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
@@ -37,15 +40,15 @@ public class ExampleUnitTest {
         //产生密钥
         byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
-        System.out.println("publicKeySM2BBB:"+ java.util.Arrays.toString(publicKeySM2));
         privateKeySM2 = key[1];
         System.out.println("publicKeySM2:"+ Util.byte2HexStr(publicKeySM2));
         System.out.println("privateKeySM2:"+Util.byte2HexStr(privateKeySM2));
 
+        //切割公钥
         int midIndex1 = publicKeySM2.length / 2;
         byte[] firstHalfpublicKeySM2 = Arrays.copyOfRange(publicKeySM2, 0, midIndex1); // 前半部分
         System.out.println("firstHalfpublicKeySM2:"+Util.byte2HexStr(firstHalfpublicKeySM2));
-        //
+
         // 创建哈希实例
         SM3Digest digest = new SM3Digest();
 
@@ -74,6 +77,67 @@ public class ExampleUnitTest {
         System.out.println("First Half: " + Util.byte2HexStr(firstHalf));
         System.out.println("Second Half: " + Util.byte2HexStr(secondHalf));
 
+
+
+        X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
+        BigInteger curveOrder = x9.getN();
+        BigInteger d = new BigInteger(1, privateKeySM2);
+        //BigInteger d2=BigInteger.valueOf(2);
+        //将前一部分哈希转为Integer
+        BigInteger d2 = new BigInteger(1, firstHalf);
+
+        System.out.println("d2="+d2);
+        System.out.println("d="+d);
+        //G乘以哈希
+        ECPoint GH = (new FixedPointCombMultiplier()).multiply(x9.getG(), d2);
+        byte[] GHB = GH.getEncoded(false);
+        if (GHB.length == 65) {
+            GHB = ByteUtils.subArray(GHB, 1, GHB.length);
+        }
+        System.out.println("G乘hash:"+Util.byte2HexStr(GHB));
+        //调用公钥推导
+        byte[] newPk=derivePk(publicKeySM2,d2);
+        System.out.println("newPk="+Util.byte2HexStr(newPk));
+      /*  //GHash乘以sk
+        ECPoint GHsk = (new FixedPointCombMultiplier()).multiply(GH, d);
+        byte[] G2skB = GHsk.getEncoded(false);
+        if (G2skB.length == 65) {
+            G2skB = ByteUtils.subArray(G2skB, 1, G2skB.length);
+        }
+        System.out.println("GhashSkB:"+Util.byte2HexStr(G2skB));
+*/
+        //G乘以skH
+        BigInteger skH= d.multiply(d2).mod(curveOrder);//模模数
+        ECPoint GskH = (new FixedPointCombMultiplier()).multiply(x9.getG(),skH);
+        byte[] GskHB = GskH.getEncoded(false);
+        if (GskHB.length == 65) {
+            GskHB = ByteUtils.subArray(GskHB, 1, GskHB.length);
+        }
+        System.out.println("GSkHB:"+Util.byte2HexStr(GskHB));
+
+        /*//试试用SkH直接生成公钥
+
+        byte[] sk2B = skH.toByteArray();
+        if (sk2B.length == 65) {
+            sk2B = ByteUtils.subArray(sk2B, 1, sk2B.length);
+        }
+        System.out.println("GskHB对应的公钥为："+Util.byte2HexStr(SM2Util.getPublicKeyFromPrivateKey(sk2B)));
+*/
+        /*
+        //2G再乘以2
+        ECPoint Q2 = (new FixedPointCombMultiplier()).multiply(Q, d2);
+        byte[] Q22 = Q2.getEncoded(false);
+        System.out.println("G乘2再乘2:"+Util.byte2HexStr(Q22));
+        //G乘以4
+        BigInteger d4=BigInteger.valueOf(4);
+        ECPoint G4 = (new FixedPointCombMultiplier()).multiply(x9.getG(), d4);
+        byte[] G44 = G4.getEncoded(false);
+        System.out.println("G乘4:"+Util.byte2HexStr(G44));
+        */
+
+
+
+
         // 将字节数组转换为密钥对象
         BigInteger skRoot = new BigInteger(1, privateKeySM2);
         System.out.println("skRoot="+skRoot);
@@ -89,11 +153,13 @@ public class ExampleUnitTest {
         System.out.println("Y Coordinate: " + yCoordinate.toString(16)); // 以十六进制格式输出
 
         // 获取曲线阶数 (n)
-        X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
-        BigInteger curveOrder = x9.getN();
+        //X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
+        //BigInteger curveOrder = x9.getN();
         System.out.println("阶数为："+curveOrder);
 
-        BigInteger hashValue = new BigInteger(1, firstHalf);
+
+        //先用2来试试
+        BigInteger hashValue = BigInteger.valueOf(1);
         System.out.println("hashvalue="+hashValue);
         BigInteger hashValueInRange = hashValue.mod(curveOrder);
         System.out.println("hashValueInRange="+hashValueInRange);
@@ -107,7 +173,7 @@ public class ExampleUnitTest {
             // 获取 x 坐标的十六进制表示
             String newPr = newPrivateKey.toString(16);
             // 转换为字节数组
-            byte[] newPrB = hexStringToByteArray(newPr);
+            byte[] newPrB = Util.hexStr2Bytes(newPr);
             System.out.println("toString对应的公钥为："+Util.byte2HexStr(SM2Util.getPublicKeyFromPrivateKey(newPrB)));
             System.out.println("toByteArray()对应的公钥为："+Util.byte2HexStr(SM2Util.getPublicKeyFromPrivateKey(newPrivateKey.toByteArray())));
         };
@@ -115,6 +181,15 @@ public class ExampleUnitTest {
 
         // 推导新的公钥
         ECPoint newPublicKey = ExampleUnitTest.derivePublicKey(pkRoot, hashValueInRange);
+        System.out.println("x9.getG()="+x9.getG());
+        System.out.println("newPublicKey="+newPublicKey);
+        //用他实现的点乘方法
+        ECPoint R = (new FixedPointCombMultiplier()).multiply(newPublicKey, hashValue);
+        byte[] publicKeyEncoded2 = R.getEncoded(false);
+        if (publicKeyEncoded2.length == 65) {
+            publicKeyEncoded2 = ByteUtils.subArray(publicKeyEncoded2, 1, publicKeyEncoded2.length);
+        }
+        System.out.println("FFF乘以2乘的公钥:"+Util.byte2HexStr(publicKeyEncoded2));
         String fullPublicKeyHex = getFullPublicKeyHex(newPublicKey);
 
         System.out.println("New Derived Public Key:" + fullPublicKeyHex);
@@ -154,6 +229,19 @@ public class ExampleUnitTest {
         return pkRoot.multiply(hashValue);
     }
 
+    // 正确的推导新的公钥
+    public static byte[] derivePk(byte[] publicKeySM2, BigInteger d2) {
+        //将pk乘以哈希
+        ECPoint P= ExampleUnitTest.convertToPublicKey(publicKeySM2);
+        ECPoint P2 = (new FixedPointCombMultiplier()).multiply(P, d2);
+        byte[] p2B = P2.getEncoded(false);
+        if (p2B.length == 65) {
+            p2B = ByteUtils.subArray(p2B, 1, p2B.length);
+        }
+        System.out.println("pk乘hash:"+Util.byte2HexStr(p2B));
+        return p2B;
+    }
+
     // 将 ECPoint 转换为十六进制字符串
     public static String getFullPublicKeyHex(ECPoint point) {
         // 获取 x 和 y 坐标
@@ -162,8 +250,8 @@ public class ExampleUnitTest {
         String xBytes = point.getXCoord().toBigInteger().toString(16);
         String yBytes = point.getYCoord().toBigInteger().toString(16);
         // 转换为字节数组
-        byte[] newx = hexStringToByteArray(xBytes);
-        byte[] newy = hexStringToByteArray(yBytes);
+        byte[] newx = Util.hexStr2Bytes(xBytes);
+        byte[] newy = Util.hexStr2Bytes(yBytes);
         System.out.println("x坐标为："+Util.byte2HexStr(newx));
         System.out.println("y坐标为："+Util.byte2HexStr(newy));
         // 创建完整的公钥字节数组
