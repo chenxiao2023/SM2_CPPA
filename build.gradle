@@ -4,6 +4,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
 
@@ -15,6 +16,8 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.android.volley:volley:1.2.1'
 
+      //  classpath 'org.bouncycastle:bcpkix-jdk18on:1.78'
+      //  classpath 'org.bouncycastle:bcprov-jdk18on:1.78'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

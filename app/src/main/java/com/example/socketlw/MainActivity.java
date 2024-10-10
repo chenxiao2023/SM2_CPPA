@@ -2,27 +2,26 @@ package com.example.socketlw;
 
 
 
+import static com.example.socketlw.CertificateGenerator.addBouncyCastleProvider;
+import static com.example.socketlw.CertificateGenerator.certRecover;
+import static com.example.socketlw.CertificateGenerator.readPublicKey;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
+
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,25 +35,39 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.bouncycastle.util.Bytes;
-import org.json.JSONArray;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+//import org.bouncycastle.openssl.PEMParser;
+
+
+
+
+
+import org.bouncycastle.asn1.x9.ECNamedCurveTable;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
+import org.bouncycastle.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
+
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,9 +75,6 @@ import cn.mtjsoft.lib_encryption.SM2.SM2Util;
 import cn.mtjsoft.lib_encryption.utils.Util;
 
 //http请求用的
-import android.os.Bundle;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -74,6 +84,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import java.util.HashMap;
 import java.util.Map;
+import java.security.*;
+
+
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -102,27 +116,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //SM2参数
     private byte[] publicKeySM2 = new byte[0];
     private byte[] privateKeySM2 = new byte[0];
+    //从服务器接收的公钥。
+    private byte[] publicKeySM2F = new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
     private String TxID="";
 
     //http参数
-
+    private String res="";
     //验证方取证书
-    private  String urlTxID2Sij = "http://jsonplaceholder.typicode.com/todos/1";
-    private  String urlUpdatePK = "http://192.168.198.20:8080/updatepk";
+    //private  String urlTxID2Sij = "http://jsonplaceholder.typicode.com/todos/1";
+    private  String urlUpdatePK = "http://192.168.198.20:8080/updatepktest";
     //签名方取TxID
     private  String urlTxID =     "http://192.168.198.20:8080/postmapget";
     private  String urlPostaddr = "http://192.168.198.20:8080/postaddr";
-
+    //从TxID取公钥
     private  String urlTxID2PublicKey = "http://192.168.198.20:8080/getpublickey";
+    //取证书
+    private  String urlCert = "http://10.152.57.101:8080/testCert";
 
 
+    private byte[] CertB = new byte[0];
     private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
+    private String address2 = "0xccdee8c8017f64c686fa39c42f883f363714e078";
+    private String chain="560AF94CC1C8BB9AE6986502136B425D";
     private String sk = "your_sk_value";
 
     private static final String URL = "http://192.168.198.20:8545";
     private static final String TAG = "VolleyRequest";
+
+    //定义证书
+
+    // 生成证书
+    private X509Certificate certificate;
 
     private static final int IMAGE = 1;//调用系统相册-选择图片
     private static String[] PERMISSIONS_STORAGE = {
@@ -155,12 +181,96 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
         privateKeySM2 = key[1];
-       //postTwo(urlUpdatePK,"TxID","address",address,"key",Util.byte2HexStr(publicKeySM2));
-        //一进来就获取TxID
-        postOne(urlTxID,"TxID","address",address);
+        System.out.println("公钥为："+Util.byte2HexStr(publicKeySM2));
+        System.out.println("私钥为："+Util.byte2HexStr(privateKeySM2));
 
-        Toast.makeText(MainActivity.this,"服务器获取TxID:"+TxID,Toast.LENGTH_LONG).show();
-        Log.d("服务器获取TxID:",TxID);
+
+        //一进来就获取TxID
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("address", address);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+      //  postOne(urlTxID,jsonObject);
+      //  TxID=res;
+
+      //  Toast.makeText(MainActivity.this,"服务器获取TxID:"+TxID,Toast.LENGTH_LONG).show();
+      //  Log.d("服务器获取TxID:",TxID);
+//从文件中读取CA公钥
+        try {
+            addBouncyCastleProvider(); // 添加 BouncyCastle 提供程序
+            String path2="app/src/main/res/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
+            String path1="C:\\Users\\22861\\Desktop\\game\\SocketLW\\app\\src\\main\\java\\com\\example\\account\\gm\\0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
+            PublicKey publicKey = readPublicKey(path2);
+            System.out.println("Public Key: " + publicKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+       //从服务器获取证书的字节流
+       /* JSONObject jsonObjectC = new JSONObject();
+        try {
+            jsonObjectC.put("TxID", TxID);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        postOne(urlCert,jsonObjectC);
+        try {
+            X509Certificate Cert=CertificateGenerator.certRecover(res);*/
+            //验证证书
+            // 读取CA公钥
+          /* PEMParser pemParserpk = new PEMParser(new FileReader("src/main/res/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub"));
+            Object objectpk = pemParserpk.readObject();
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+            PublicKey publicKeyCA = converter.getPublicKey((SubjectPublicKeyInfo) objectpk);
+            pemParserpk.close();*/
+            //Cert.verify(publicKeyCA, "BC");
+
+           /* String pkInCert=CertificateGenerator.PkRecover(    Util.byte2HexStr(Cert.getEncoded())    );
+            System.out.println("pkInCert="+pkInCert);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }*/
+
+
+
+     /* //发出更新公钥指令
+        JSONObject jsonObjectUPdate = new JSONObject();
+        try {
+            jsonObjectUPdate.put("address", "0xccdee8c8017f64c686fa39c42f883f363714e078");
+            jsonObjectUPdate.put("pkIndex", 1);
+           // jsonObjectUPdate.put("key", Util.byte2HexStr(publicKeySM2));
+            jsonObjectUPdate.put("key", "FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
+            jsonObjectUPdate.put("chain", chain);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        postOne(urlUpdatePK,jsonObjectUPdate);
+
+        publicKeySM2F=Util.hexStr2Bytes(res);
+
+        //更新本地公钥
+       //Log.d("本地推导的公钥为：",Util.byte2HexStr(Update.derivePk(Util.hexStr2Bytes(), BigInteger.valueOf(1))));
+        String chain2="560AF94CC1C8BB9AE6986502136B425D";
+        byte[] chainroot = Util.hexStr2Bytes(chain2);
+        String pk="FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
+        String sk="FF5934D949F3B9FC972EF14123BD8855ECC0BA63D0BDAAD38A7D86690A031C53";
+        byte[] hash=Update.Hashpkichain(Util.hexStr2Bytes(pk),1,chainroot);
+        System.out.println("hash"+Util.byte2HexStr(hash));
+        int midIndex = hash.length / 2;
+        byte[] firstHalf = Arrays.copyOfRange(hash, 0, midIndex); // 前半部分
+        System.out.println("哈希值"+Util.byte2HexStr(firstHalf));
+        BigInteger d2 = new BigInteger(1, firstHalf);
+       // byte[] newpk=Update.derivePk(Util.hexStr2Bytes(aa),d2);
+        BigInteger d = new BigInteger(1, Util.hexStr2Bytes(sk));
+        X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
+        BigInteger curveOrder = x9.getN();
+        byte[] newsk=Update.deriveSk(d,d2,curveOrder);
+        System.out.println("本地推的私钥为："+Util.byte2HexStr(newsk));
+        byte[] newpk= SM2Util.getPublicKeyFromPrivateKey(newsk);
+        System.out.println("本地推的公钥为："+Util.byte2HexStr(newpk));
+*/
     }
 
     /**
@@ -532,7 +642,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         titletext = json.getString("peoplen");
                         TxID=json.getString("TxID");
                         handler.sendEmptyMessage(1);
-                        postOne(urlTxID2PublicKey,"pk","txid",TxID);
+                        //给出TxID，返回公钥
+                        JSONObject jsonObjectT = new JSONObject();
+                        try {
+                            jsonObjectT.put("txid", TxID);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        postOne(urlTxID2PublicKey,jsonObjectT);
+                        publicKeySM2=Util.hexStr2Bytes(res);
                         Log.d("接收从服务端的TxID后，获取公钥：",Util.byte2HexStr(publicKeySM2));
                        /* Log.d("接收消息后更新公钥","已更新公钥");
                         updatepk(urlUpdatePK,address);
@@ -564,11 +682,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
       //  TxID="到时候再去区块链取";
         sk=Util.byte2HexStr(privateKeySM2);
 
+//先转到这来验证公钥
+     /*   publicKeySM2F=Util.hexStr2Bytes(res);
+        Log.d("传来的公钥为：",Util.byte2HexStr(publicKeySM2F));
+        //更新密钥
+        String aa="A5B4792C75CDF7D4DF2CA1370F15FAA2FF8ADEB1C7CBBA7CE94FF98EC8F788C9186C3438482D0D027A00A77A78326639649DF283A872DAB3DEE8C5C3877D5099";
+        Log.d("本地推导的公钥为：",Util.byte2HexStr(Update.derivePk(Util.hexStr2Bytes(aa), BigInteger.valueOf(1))));
+*/
 
-       // Log.d("接收消息后更新公钥","已更新公钥");
+        // Log.d("接收消息后更新公钥","已更新公钥");
        //updatepk(urlUpdatePK,address);
-
-        postOne(urlTxID,"TxID","address",address);//从Address得到txID
+        //g给出地址，获取TxID
+        JSONObject jsonObjectA = new JSONObject();
+        try {
+            jsonObjectA.put("address", address);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        postOne(urlTxID,jsonObjectA);//从Address得到txID
+        TxID=res;
         Toast.makeText(MainActivity.this,"客户端获取TxID:"+TxID,Toast.LENGTH_LONG).show();
         Log.d("客户端获取TxID:",TxID);
        // sendPostRequest();
@@ -765,77 +897,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    private void postTwo(String url,String res,final String key1 ,final String value1,final String key2 ,final String value2) {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        // 在函数内部生成 JSON 对象
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            // 添加键值对到 JSON 对象
-            jsonObject.put(key1, value1);
-            jsonObject.put(key2, value2);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // 假设服务器返回一个含有TXID的JSON字符串
-                        // 直接将响应的字符串作为 TXID
-                        switch (res) {
-                            case "TxID":
-                                TxID=response;
-                                break;
-                            case "pk":
-                                publicKeySM2=response.getBytes();
-                                break;
-                            default:
-                        }
-
-                        Toast.makeText(MainActivity.this, "请求成功: response = " + response, Toast.LENGTH_SHORT).show();
-                        Log.d("测试6", "response = " + response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d("ppp", error.getMessage());
-                    }
-                }) {
-            @Override
-            public byte[] getBody() {
-                // 返回 JSON 格式的请求体
-                return jsonObject.toString().getBytes();
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
-        };
-
-        queue.add(jsonRequest);
-    }
+   
 
 //传1个参数
-private void postOne(String url,String res,final String key ,final String value) {
+private void postOne(String url,JSONObject jsonObject) {
     RequestQueue queue = Volley.newRequestQueue(this);
 
     // 在函数内部生成 JSON 对象
-    JSONObject jsonObject = new JSONObject();
+   // JSONObject jsonObject = new JSONObject();
 
-    try {
+ /*   try {
         // 添加键值对到 JSON 对象
         jsonObject.put(key, value);
 
     } catch (JSONException e) {
         e.printStackTrace();
-    }
+    }*/
 
     StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
             new Response.Listener<String>() {
@@ -843,27 +920,15 @@ private void postOne(String url,String res,final String key ,final String value)
                 public void onResponse(String response) {
                     // 假设服务器返回一个含有TXID的JSON字符串
                     // 直接将响应的字符串作为 TXID
-                    switch (res) {
-                        case "TxID":
-                            TxID=response;
-                            Toast.makeText(MainActivity.this, "请求成功: TXID = " + TxID, Toast.LENGTH_SHORT).show();
-                            Log.d("测试PostOne", "url = " + url);
-                            Log.d("测试PostOne", "TXID = " + TxID);
-                            break;
-                        case "pk":
-                            publicKeySM2=response.getBytes();
-                            Toast.makeText(MainActivity.this, "请求成功: publicKeySM2 = " + Util.byte2HexStr(publicKeySM2), Toast.LENGTH_SHORT).show();
-                            Log.d("测试PostOne","传递的TxID是"+value);
-                            Log.d("测试PostOne", "url = " + url);
-                            Log.d("测试PostOne", "publicKeySM2 = " + Util.byte2HexStr(publicKeySM2));
-                            Log.d("测试PostOne,直接输出的公钥：",response);
-                            break;
-                        default:
-                    }
+
+                    res=response;
+                    Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
+                    Log.d("测试PostOne", "url = " + url);
+                    Log.d("测试PostOne", "response =" + res);
 
                     Log.d("测试PostOne", "执行成功");
-
                 }
+
             },
             new Response.ErrorListener() {
                 @Override
@@ -886,8 +951,6 @@ private void postOne(String url,String res,final String key ,final String value)
 
     queue.add(jsonRequest);
 }
-
-
 
 
 

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.socketlw"
-        minSdkVersion 19
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -50,4 +50,10 @@ dependencies {
     implementation project(path: ':lib_encryption')
     //http请求用的
     implementation 'com.android.volley:volley:1.2.1'
+    //bc库
+  //  implementation files('libs/bcutil-jdk18on-1.78.jar')
+   // implementation 'org.bouncycastle:bcpkix-jdk18on:1.78'
+   // implementation 'org.bouncycastle:bcprov-jdk18on:1.78'
+ //   api 'org.bouncycastle:bcpkix-jdk18on:1.65'
+   // implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 }
