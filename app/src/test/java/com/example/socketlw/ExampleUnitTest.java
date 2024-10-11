@@ -10,19 +10,22 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
+
+import org.bouncycastle.pqc.legacy.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.SM2Utils.Util;
 
 
-import cn.mtjsoft.lib_encryption.SM2.SM2Util;
-import cn.mtjsoft.lib_encryption.utils.Util;
 
 
 /**
@@ -40,7 +43,7 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
         //产生密钥
-        byte[][] key = SM2Util.generateKeyPair();
+       byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
         privateKeySM2 = key[1];
         System.out.println("publicKeySM2:"+ Util.byte2HexStr(publicKeySM2));
@@ -72,6 +75,8 @@ public class ExampleUnitTest {
 
             chainroot=secondHalf;
         }
+
+
     }
 
     // 生成哈希

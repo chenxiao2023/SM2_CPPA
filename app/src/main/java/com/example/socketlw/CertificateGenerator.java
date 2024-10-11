@@ -1,18 +1,25 @@
 package com.example.socketlw;
 
-import org.bouncycastle.asn1.ASN1BitString;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.gm.GMObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import com.example.socketlw.SM2Utils.Util;
+
 import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.ASN1BitString;
+import org.spongycastle.asn1.DERBitString;
+import org.spongycastle.asn1.x509.*;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.gm.GMObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+
+//import org.bouncycastle.util.encoders.Hex;
 
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -27,9 +34,10 @@ import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+//import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import cn.mtjsoft.lib_encryption.utils.Util;
 
 
 public class CertificateGenerator {
@@ -38,13 +46,13 @@ public class CertificateGenerator {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         // 读取CA私钥
-        PEMParser pemParsersk = new PEMParser(new FileReader("src/main/resources/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem"));
+        PEMParser pemParsersk = new PEMParser(new FileReader("src/main/resources/account/gm/x4c26aecee34487d29adff978fd6791578ed8fd28.pem"));
         Object objectsk = pemParsersk.readObject();
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
         PrivateKey privateKeyCA = converter.getPrivateKey((PrivateKeyInfo) objectsk);
         pemParsersk.close();
         // 读取CA公钥
-        PEMParser pemParserpk = new PEMParser(new FileReader("src/main/resources/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub"));
+        PEMParser pemParserpk = new PEMParser(new FileReader("src/main/resources/account/gm/x.pub"));
         Object objectpk = pemParserpk.readObject();
         PublicKey publicKeyCA = converter.getPublicKey((SubjectPublicKeyInfo) objectpk);
         pemParserpk.close();
@@ -63,52 +71,18 @@ public class CertificateGenerator {
         return Hex.toHexString(certificate.getEncoded());
     }*/
 // 添加 BouncyCastle 提供程序
-   public static void addBouncyCastleProvider() {
-       Security.addProvider(new BouncyCastleProvider());
-   }
 
-    public static PublicKey readPublicKey(String fileName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-        // 添加 Bouncy Castle 作为安全提供者
-        Security.addProvider(new BouncyCastleProvider());
-
-        // 使用 PEMParser 读取 PEM 文件
-        try (FileReader keyReader = new FileReader(fileName);
-             PEMParser pemParser = new PEMParser(keyReader)) {
-
-            // 解析 PEM 文件内容
-            SubjectPublicKeyInfo publicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
-
-            // 使用 PublicKeyFactory 生成公钥
-            byte[] encoded = publicKeyInfo.getEncoded();
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC"); // 使用相应算法替换 "RSA"
-            return keyFactory.generatePublic(keySpec);
-        }
-    }
     // 读取公钥的方法
-    public static PublicKey readPublicKey(String filePath) throws Exception {
-        StringBuilder publicKeyPEM = new StringBuilder();
+    public static PublicKey readPublicKey(String path) throws Exception {
 
-        // 读取 PEM 文件
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                // 跳过开头和结尾的标头
-                if (line.contains("BEGIN PUBLIC KEY") || line.contains("END PUBLIC KEY")) {
-                    continue;
-                }
-                publicKeyPEM.append(line.trim());
-            }
-        }
-
-        // Base64 解码
-        byte[] encoded = Base64.getDecoder().decode(publicKeyPEM.toString().getBytes(StandardCharsets.UTF_8));
-
-        // 使用 KeyFactory 创建 PublicKey
-        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC"); // 使用 BouncyCastle 提供程序
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-     //   System.out.println("keyFactory.generatePublic(keySpec)="+keyFactory.generatePublic(keySpec));
-        return keyFactory.generatePublic(keySpec);
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("SC");
+        // 读取CA公钥
+        PEMParser pemParserpk = new PEMParser(new FileReader(path));
+        Object objectpk = pemParserpk.readObject();
+        PublicKey publicKeyCA = converter.getPublicKey((SubjectPublicKeyInfo) objectpk);
+        pemParserpk.close();
+        return publicKeyCA;
     }
 
 

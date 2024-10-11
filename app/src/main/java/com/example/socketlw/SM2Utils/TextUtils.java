@@ -1,11 +1,6 @@
-package android.text;
+package com.example.socketlw.SM2Utils;
 
-/**
- * @author mtj
- * @date 2021/8/31
- * @desc
- * @email mtjsoft3@gmail.com
- */
+
 public class TextUtils {
     public static boolean isEmpty(CharSequence str) {
         if (str == null || str.equals("")) {

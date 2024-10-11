@@ -1,4 +1,4 @@
-package cn.mtjsoft.lib_encryption.SM2;
+package com.example.socketlw.SM2Utils;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;

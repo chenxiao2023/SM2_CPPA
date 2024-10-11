@@ -1,8 +1,5 @@
 package com.example.socketlw;
 
-
-
-import static com.example.socketlw.CertificateGenerator.addBouncyCastleProvider;
 import static com.example.socketlw.CertificateGenerator.certRecover;
 import static com.example.socketlw.CertificateGenerator.readPublicKey;
 
@@ -35,21 +32,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+//import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 //import org.bouncycastle.openssl.PEMParser;
-
-
-
-
-
-import org.bouncycastle.asn1.x9.ECNamedCurveTable;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
-import org.bouncycastle.util.Arrays;
+//import org.bouncycastle.asn1.x9.ECNamedCurveTable;
+//import org.bouncycastle.asn1.x9.X9ECParameters;
+//import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
+//import org.bouncycastle.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,8 +65,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import cn.mtjsoft.lib_encryption.SM2.SM2Util;
-import cn.mtjsoft.lib_encryption.utils.Util;
 
 //http请求用的
 import com.android.volley.Request;
@@ -82,6 +74,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.SM2Utils.Util;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.security.*;
@@ -181,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
         privateKeySM2 = key[1];
-        System.out.println("公钥为："+Util.byte2HexStr(publicKeySM2));
+        System.out.println("公钥为："+ Util.byte2HexStr(publicKeySM2));
         System.out.println("私钥为："+Util.byte2HexStr(privateKeySM2));
 
 
@@ -199,13 +194,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
       //  Log.d("服务器获取TxID:",TxID);
 //从文件中读取CA公钥
         try {
-            addBouncyCastleProvider(); // 添加 BouncyCastle 提供程序
-            String path2="app/src/main/res/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
-            String path1="C:\\Users\\22861\\Desktop\\game\\SocketLW\\app\\src\\main\\java\\com\\example\\account\\gm\\0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
-            PublicKey publicKey = readPublicKey(path2);
+            String path1="app/src/main/res/account/gm/x.pub";
+            String path2="C:\\Users\\22861\\Desktop\\game\\SocketLW\\app\\src\\main\\java\\com\\example\\account\\gm\\x.pub";
+            String path3="src/main/res/account/gm/x.pub";
+            String path4="src\\main\\res\\account\\gm\\x.pub";
+            String path5="account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
+            String path6="res/account/gm/x.pub";
+
+
+            InputStream inputStream = getResources().openRawResource(R.raw.x);
+            File outFile = new File(getFilesDir(), "pub"); // 确保使用正确的文件扩展名
+            FileOutputStream outputStream = new FileOutputStream(outFile);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            outputStream.close();
+            inputStream.close();
+
+            String filePath = outFile.getAbsolutePath(); // 现在你可以获取文件路径
+            // 在此处使用filePath
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            PublicKey publicKey = readPublicKey(filePath);
             System.out.println("Public Key: " + publicKey);
         } catch (Exception e) {
             e.printStackTrace();
+
         }
        //从服务器获取证书的字节流
        /* JSONObject jsonObjectC = new JSONObject();
@@ -219,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             X509Certificate Cert=CertificateGenerator.certRecover(res);*/
             //验证证书
             // 读取CA公钥
-          /* PEMParser pemParserpk = new PEMParser(new FileReader("src/main/res/account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub"));
+          /* PEMParser pemParserpk = new PEMParser(new FileReader("src/main/res/account/gm/x.pub"));
             Object objectpk = pemParserpk.readObject();
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
             PublicKey publicKeyCA = converter.getPublicKey((SubjectPublicKeyInfo) objectpk);

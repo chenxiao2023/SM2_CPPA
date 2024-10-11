@@ -1,4 +1,6 @@
-package cn.mtjsoft.lib_encryption.utils;
+package com.example.socketlw.SM2Utils;
+
+import static java.lang.System.arraycopy;
 
 import android.text.TextUtils;
 
@@ -6,14 +8,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static java.lang.System.arraycopy;
 
-/**
- * @author mtj
- * @date 2021/8/6
- * @desc
- * @email mtjsoft3@gmail.com
- */
 public class Util {
     /**
      * 十六进制字符串转换为byte[]
@@ -41,12 +36,7 @@ public class Util {
     }
 
 
-    /**
-     * byte[]转换为十六进制字符串
-     *
-     * @param bytes 需要转换为字符串的byte[]
-     * @return 转换后的十六进制字符串
-     */
+
     public static String byte2HexStr(byte[] bytes) {
         if (bytes == null) {
             return "";
@@ -65,11 +55,7 @@ public class Util {
         return hs.toString().toUpperCase();
     }
 
-    /**
-     * 随机生成一个指定长度的字节数组
-     *
-     * @param len 给定的长度
-     */
+
     public static byte[] genRandomBytes(int len) {
         byte[] seed = new byte[len];
         SecureRandom random = new SecureRandom();

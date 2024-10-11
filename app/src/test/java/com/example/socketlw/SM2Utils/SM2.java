@@ -1,4 +1,4 @@
-package cn.mtjsoft.lib_encryption.SM2;
+package com.example.socketlw.SM2Utils;
 
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X9ECParameters;
@@ -11,11 +11,12 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
-import org.bouncycastle.math.ec.WNafUtil;
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
+import org.bouncycastle.pqc.legacy.math.linearalgebra.ByteUtils;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+
+
 
 /**
  * @author mtj

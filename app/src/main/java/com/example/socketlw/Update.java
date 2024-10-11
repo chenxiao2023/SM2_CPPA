@@ -1,5 +1,8 @@
 package com.example.socketlw;
 
+import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.SM2Utils.Util;
+
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.SM3Digest;
@@ -7,14 +10,14 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
+
+import org.bouncycastle.pqc.legacy.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import cn.mtjsoft.lib_encryption.SM2.SM2Util;
-import cn.mtjsoft.lib_encryption.utils.Util;
+
 
 public class Update {
 
@@ -36,7 +39,7 @@ public class Update {
         byte[][] key = SM2Util.generateKeyPair();
 
         System.out.println("publicKeySM2:"+ Util.byte2HexStr(publicKeySM2));
-        System.out.println("privateKeySM2:"+Util.byte2HexStr(privateKeySM2));
+        System.out.println("privateKeySM2:"+ Util.byte2HexStr(privateKeySM2));
         byte[] chainroot = chainS.getBytes();
 
         X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
