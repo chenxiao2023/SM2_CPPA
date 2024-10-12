@@ -22,6 +22,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+
 import com.example.socketlw.SM2Utils.SM2Util;
 import com.example.socketlw.SM2Utils.Util;
 
@@ -42,6 +46,15 @@ public class ExampleUnitTest {
 
     @Test
     public void addition_isCorrect() {
+// 注册 Bouncy Castle 提供者
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
+        Provider provider = Security.getProvider("SC");
+
+        // 遍历并打印所有算法
+        for (Provider.Service service : provider.getServices()) {
+            System.out.println(service.getType() + ": " + service.getAlgorithm());
+        }
+/*
         //产生密钥
        byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
@@ -75,7 +88,7 @@ public class ExampleUnitTest {
 
             chainroot=secondHalf;
         }
-
+*/
 
     }
 

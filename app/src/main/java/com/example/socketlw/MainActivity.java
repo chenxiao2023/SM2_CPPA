@@ -2,7 +2,6 @@ package com.example.socketlw;
 
 import static com.example.socketlw.CertificateGenerator.certRecover;
 import static com.example.socketlw.CertificateGenerator.readPublicKey;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,18 +29,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-//import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-//import org.bouncycastle.openssl.PEMParser;
-//import org.bouncycastle.asn1.x9.ECNamedCurveTable;
-//import org.bouncycastle.asn1.x9.X9ECParameters;
-//import org.bouncycastle.jcajce.provider.asymmetric.ec.GMCipherSpi;
-//import org.bouncycastle.util.Arrays;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
-
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -65,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-
 //http请求用的
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -74,15 +65,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.socketlw.MainUse.MessageHolder;
 import com.example.socketlw.SM2Utils.SM2Util;
 import com.example.socketlw.SM2Utils.Util;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.security.*;
-
-
-
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -95,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button startserver;
     private Button continueserver;
     private Button sendmsgbt;
-    private Button sendimg;
     private int StartPort;
     private boolean isContinue = true,isServer = false;
     private String message = "",userSendMsg = "",titletext = "";
@@ -107,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static Socket socket = null;//用于与服务端通信的Socket
     private static ServerSocket server;
     private static List<PrintWriter> allOut; //存放所有客户端的输出流的集合，用于广播
-
     //SM2参数
     private byte[] publicKeySM2 = new byte[0];
     private byte[] privateKeySM2 = new byte[0];
@@ -116,45 +104,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
     private String TxID="";
-
     //http参数
     private String res="";
+    private String CertString = "";
     //验证方取证书
-    //private  String urlTxID2Sij = "http://jsonplaceholder.typicode.com/todos/1";
+    private String filePath="/data/user/0/com.example.socketlw/files/pub";
+   // private String filePath="/data/user/0/com.example.socketlw/files/pub"
     private  String urlUpdatePK = "http://192.168.198.20:8080/updatepktest";
     //签名方取TxID
-    private  String urlTxID =     "http://192.168.198.20:8080/postmapget";
+    private  String urlTxID =     "http://192.168.198.20:8080/gettxid";
     private  String urlPostaddr = "http://192.168.198.20:8080/postaddr";
     //从TxID取公钥
     private  String urlTxID2PublicKey = "http://192.168.198.20:8080/getpublickey";
     //取证书
-    private  String urlCert = "http://10.152.57.101:8080/testCert";
+  //  private  String urlCert = "http://192.168.198.20:8080/testCert";
+    private  String urlCert = "http://192.168.198.20:8080/certtest";
+    private  String urlCert2 = "http://192.168.198.20:8080/certtest2";
 
 
-    private byte[] CertB = new byte[0];
     private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
     private String address2 = "0xccdee8c8017f64c686fa39c42f883f363714e078";
     private String chain="560AF94CC1C8BB9AE6986502136B425D";
-    private String sk = "your_sk_value";
-
-    private static final String URL = "http://192.168.198.20:8545";
-    private static final String TAG = "VolleyRequest";
-
-    //定义证书
-
     // 生成证书
     private X509Certificate certificate;
 
-    private static final int IMAGE = 1;//调用系统相册-选择图片
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请
             Manifest.permission.INTERNET,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
-
-
     @Override//实现了一个 Android Activity 的初始化逻辑
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();//隐藏标题栏
@@ -171,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 super.handleMessage(msg);
             }
         };
-
         //SM2的初始化
         byte[][] key = SM2Util.generateKeyPair();
         publicKeySM2 = key[0];
@@ -179,115 +158,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("公钥为："+ Util.byte2HexStr(publicKeySM2));
         System.out.println("私钥为："+Util.byte2HexStr(privateKeySM2));
 
-
+        //获取ca公钥
+        PublicKey pk= null;
+        try {
+         pk = readPublicKey(getpath());
+        System.out.println("从文件中读取的pk："+pk);
+        String encodecert="3082013f3081e5a003020102020601927c136018300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031303134353435375a170d3235313031313134353435375a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100fc5b2396034b0c1807eed779b7d20f8c97e22ce4e6ba18156458bbcf76172ab9d0074745eb713cddcb5c21a95a79631ee626f8f2266ef7bc9d8df2b8c652d530300a06082a811ccf550183750349003046022100c384402ea48bfca8f30f980d10bdf63f10a5fcefb4da038704066efa2bbee566022100ec435a3056aa27fa87666f1994edf11cc94dab22103ef5cb278e4a7cfe452589";
+        CertificateGenerator.certRecover(encodecert);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         //一进来就获取TxID
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("address", address);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-      //  postOne(urlTxID,jsonObject);
-      //  TxID=res;
-
-      //  Toast.makeText(MainActivity.this,"服务器获取TxID:"+TxID,Toast.LENGTH_LONG).show();
-      //  Log.d("服务器获取TxID:",TxID);
-//从文件中读取CA公钥
-        try {
-            String path1="app/src/main/res/account/gm/x.pub";
-            String path2="C:\\Users\\22861\\Desktop\\game\\SocketLW\\app\\src\\main\\java\\com\\example\\account\\gm\\x.pub";
-            String path3="src/main/res/account/gm/x.pub";
-            String path4="src\\main\\res\\account\\gm\\x.pub";
-            String path5="account/gm/0x4c26aecee34487d29adff978fd6791578ed8fd28.pem.pub";
-            String path6="res/account/gm/x.pub";
-
-
-            InputStream inputStream = getResources().openRawResource(R.raw.x);
-            File outFile = new File(getFilesDir(), "pub"); // 确保使用正确的文件扩展名
-            FileOutputStream outputStream = new FileOutputStream(outFile);
-
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-
-            outputStream.close();
-            inputStream.close();
-
-            String filePath = outFile.getAbsolutePath(); // 现在你可以获取文件路径
-            // 在此处使用filePath
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            PublicKey publicKey = readPublicKey(filePath);
-            System.out.println("Public Key: " + publicKey);
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
+        // postOne(urlTxID);
+      //  postOne(urlTxID2PublicKey);
        //从服务器获取证书的字节流
-       /* JSONObject jsonObjectC = new JSONObject();
-        try {
-            jsonObjectC.put("TxID", TxID);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        postOne(urlCert,jsonObjectC);
-        try {
-            X509Certificate Cert=CertificateGenerator.certRecover(res);*/
-            //验证证书
-            // 读取CA公钥
-          /* PEMParser pemParserpk = new PEMParser(new FileReader("src/main/res/account/gm/x.pub"));
-            Object objectpk = pemParserpk.readObject();
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-            PublicKey publicKeyCA = converter.getPublicKey((SubjectPublicKeyInfo) objectpk);
-            pemParserpk.close();*/
-            //Cert.verify(publicKeyCA, "BC");
+     //   postOne(urlCert);
 
-           /* String pkInCert=CertificateGenerator.PkRecover(    Util.byte2HexStr(Cert.getEncoded())    );
-            System.out.println("pkInCert="+pkInCert);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }*/
-
-
-
-     /* //发出更新公钥指令
-        JSONObject jsonObjectUPdate = new JSONObject();
-        try {
-            jsonObjectUPdate.put("address", "0xccdee8c8017f64c686fa39c42f883f363714e078");
-            jsonObjectUPdate.put("pkIndex", 1);
-           // jsonObjectUPdate.put("key", Util.byte2HexStr(publicKeySM2));
-            jsonObjectUPdate.put("key", "FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
-            jsonObjectUPdate.put("chain", chain);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        postOne(urlUpdatePK,jsonObjectUPdate);
-
-        publicKeySM2F=Util.hexStr2Bytes(res);
+      //发出更新公钥指令
+      //  postOne(urlUpdatePK);
 
         //更新本地公钥
-       //Log.d("本地推导的公钥为：",Util.byte2HexStr(Update.derivePk(Util.hexStr2Bytes(), BigInteger.valueOf(1))));
-        String chain2="560AF94CC1C8BB9AE6986502136B425D";
-        byte[] chainroot = Util.hexStr2Bytes(chain2);
-        String pk="FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
-        String sk="FF5934D949F3B9FC972EF14123BD8855ECC0BA63D0BDAAD38A7D86690A031C53";
-        byte[] hash=Update.Hashpkichain(Util.hexStr2Bytes(pk),1,chainroot);
-        System.out.println("hash"+Util.byte2HexStr(hash));
-        int midIndex = hash.length / 2;
-        byte[] firstHalf = Arrays.copyOfRange(hash, 0, midIndex); // 前半部分
-        System.out.println("哈希值"+Util.byte2HexStr(firstHalf));
-        BigInteger d2 = new BigInteger(1, firstHalf);
-       // byte[] newpk=Update.derivePk(Util.hexStr2Bytes(aa),d2);
-        BigInteger d = new BigInteger(1, Util.hexStr2Bytes(sk));
-        X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
-        BigInteger curveOrder = x9.getN();
-        byte[] newsk=Update.deriveSk(d,d2,curveOrder);
-        System.out.println("本地推的私钥为："+Util.byte2HexStr(newsk));
-        byte[] newpk= SM2Util.getPublicKeyFromPrivateKey(newsk);
-        System.out.println("本地推的公钥为："+Util.byte2HexStr(newpk));
-*/
+       /* new Update(publicKeySM2,privateKeySM2,chain);
+        Update.updateAll(1);
+        System.out.println("更新后的公钥："+Util.byte2HexStr(Update.publicKeySM2));
+        System.out.println("更新后的私钥："+Util.byte2HexStr(Update.privateKeySM2));*/
     }
 
     /**
@@ -311,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        // sendimg.setOnClickListener(this);
 
     }
-
     //定义判断权限申请的函数，在onCreat中调用就行
     public void applypermission(){
         if(Build.VERSION.SDK_INT>=23){
@@ -385,42 +278,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.sendmsgbt://发送消息
-                if(isServer){//服务器
+                if(isServer)//服务器
+                {
                     message = sendmsgtext.getText().toString();
                     if(message==null||"".equals(message)){
                         Toast.makeText(MainActivity.this,"发送消息不能为空",Toast.LENGTH_LONG).show();
                         return ;
                     }
                     long Ltimes = System.currentTimeMillis();
-                    //String signature="暂时签名";
-                    //TxID="到时候再去区块链取";
-                    sk=Util.byte2HexStr(privateKeySM2);
-
-                   // sendPostRequest();
-
                     sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
-                 //   verifySign=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
-                  //  Log.d("发送消息时","verifySign="+verifySign);
-                    //signature=sign.toString();
                     message = sendmsgtext.getText().toString();
                     String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
                     String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
                     datas.add(new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1"));
                     sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
-
-
-
                 }else {//客户端
                     sendMsgText();
                 }
-
-
                 break;
         }
     }
-
     /**
      * 服务器端
      * @param out
@@ -429,13 +308,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private synchronized void addOut(PrintWriter out){
         allOut.add(out);
     }
-
     //将给定的输出流移出集合
     private synchronized void removeOut(PrintWriter out){
         allOut.remove(out);
     }
-
-
     //将给定的消息发给客户端
     private void sendMessage(String message) {
         Thread sendmsg = new Thread(new Runnable() {
@@ -448,8 +324,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         sendmsg.start();
     }
-
-
     //服务器初始化
     public void ServerInit() {
         try {
@@ -482,7 +356,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }).start();
     }
-
 
     //该线程类是与指定的客户端进行交互工作
     class ClientHandler implements Runnable{
@@ -564,13 +437,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
     /**
      * 客户端
      * @return
      */
     public boolean ContinueSever(){
-
         Thread continuethread = new Thread(
                 new Runnable() {
                     @Override
@@ -660,23 +531,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         TxID=json.getString("TxID");
                         handler.sendEmptyMessage(1);
                         //给出TxID，返回公钥
-                        JSONObject jsonObjectT = new JSONObject();
-                        try {
-                            jsonObjectT.put("txid", TxID);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                        postOne(urlTxID2PublicKey,jsonObjectT);
-                        publicKeySM2=Util.hexStr2Bytes(res);
-                        Log.d("接收从服务端的TxID后，获取公钥：",Util.byte2HexStr(publicKeySM2));
-                       /* Log.d("接收消息后更新公钥","已更新公钥");
-                        updatepk(urlUpdatePK,address);
-                        Log.d("更新公钥后获取txid","TxID="+TxID   );*/
-                        //messageAdapte.notifyDataSetChanged();//通知数据源发生变化
+                        postOne(urlTxID2PublicKey);
+                     //   messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
-
                     message1=br.readLine();
                 }
             } catch (Exception e) {
@@ -684,7 +543,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
     /**
      * 发送消息
      */
@@ -695,33 +553,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return ;
         }
         long Ltimes = System.currentTimeMillis();
-       // String signature="暂时签名";
-      //  TxID="到时候再去区块链取";
-        sk=Util.byte2HexStr(privateKeySM2);
-
-//先转到这来验证公钥
-     /*   publicKeySM2F=Util.hexStr2Bytes(res);
-        Log.d("传来的公钥为：",Util.byte2HexStr(publicKeySM2F));
-        //更新密钥
-        String aa="A5B4792C75CDF7D4DF2CA1370F15FAA2FF8ADEB1C7CBBA7CE94FF98EC8F788C9186C3438482D0D027A00A77A78326639649DF283A872DAB3DEE8C5C3877D5099";
-        Log.d("本地推导的公钥为：",Util.byte2HexStr(Update.derivePk(Util.hexStr2Bytes(aa), BigInteger.valueOf(1))));
-*/
-
-        // Log.d("接收消息后更新公钥","已更新公钥");
-       //updatepk(urlUpdatePK,address);
-        //g给出地址，获取TxID
-        JSONObject jsonObjectA = new JSONObject();
-        try {
-            jsonObjectA.put("address", address);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        postOne(urlTxID,jsonObjectA);//从Address得到txID
-        TxID=res;
-        Toast.makeText(MainActivity.this,"客户端获取TxID:"+TxID,Toast.LENGTH_LONG).show();
-        Log.d("客户端获取TxID:",TxID);
-       // sendPostRequest();
-
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
        //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
@@ -733,10 +564,77 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"id\":\""+mID+"\"}";
         datas.add(m);
         messageAdapte.notifyDataSetChanged();//通知数据源发生变化
-
         sendmsgtext.setText("");
     }
 
+//传1个参数
+private void postOne(String url) {
+    RequestQueue queue = Volley.newRequestQueue(this);
+    StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
+            new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    res=response;
+                    Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
+                    Log.d("测试PostOne", "url = " + url);
+                    Log.d("测试PostOne", "response =" + res);
+                    switch (url){
+                        case "urlTxID":
+                            TxID=response;
+                            break;
+                        case "urlTxID2PublicKey":
+                            publicKeySM2F=Util.hexStr2Bytes(response);
+                        case "urlUpdatePK":
+                            TxID=response;
+                        case "urlCert22":
+                            CertString=response;
+                        default:
+                            System.out.println("Url错误！！");
+
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d("请求失败", error.getMessage());
+                }
+            }) {
+        @Override
+        public byte[] getBody() {
+            JSONObject jsonObject = new JSONObject();
+            switch (url){
+                case "urlTxID":
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address);
+                    break;
+                case "urlTxID2PublicKey":
+                    jsonObject=JsonPut.PutJson(jsonObject,"txid","0x04945ae26b91d97f924f496332a34a4a6c9ed29e7a61a482d69eeb2082b299ff");
+                case "urlUpdatePK":
+                    jsonObject=JsonPut.PutJson(jsonObject,"address","0xccdee8c8017f64c686fa39c42f883f363714e078");
+                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",1);
+                    // jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
+                    jsonObject=JsonPut.PutJson(jsonObject,"key","FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
+                    jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
+                case "urlCert22":
+                    jsonObject=JsonPut.PutJson(jsonObject,"key","FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
+                default:
+                    System.out.println("Url错误！！");
+
+            }
+            // 返回 JSON 格式的请求体
+            return jsonObject.toString().getBytes();
+
+        }
+        @Override
+        public String getBodyContentType() {
+            return "application/json; charset=utf-8";
+        }
+    };
+    queue.add(jsonRequest);
+}
+
+//消息适应
     class MessageAdapte extends BaseAdapter {
 
         @Override
@@ -754,7 +652,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Long id = datas.get(i).getUserID();
             return id==null?0:id;
         }
-
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             MessageHolder holder = null;
@@ -768,7 +665,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder.rightsign = (TextView) view.findViewById(R.id.itemsignright);
                 holder.lefttime = (TextView) view.findViewById(R.id.itemtimeleft);
                 holder.righttime = (TextView) view.findViewById(R.id.itemtimeright);
-
                 holder.rightimgtime = (TextView) view.findViewById(R.id.rightimgtime);
                 holder.leftimgtime = (TextView) view.findViewById(R.id.leftimgtime);
                 holder.rightimg = (ImageView) view.findViewById(R.id.rightimg);
@@ -790,20 +686,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //显示
             if (mi.getUserID() == mID){//id相等,自己发的
                 if(mi.getType().equals("0")){//图片
-                    holder.leftimg.setVisibility(View.GONE);
-                    holder.leftimgtime.setVisibility(View.GONE);
-
-                    holder.rightimg.setVisibility(View.VISIBLE);
-                    holder.rightimgtime.setVisibility(View.VISIBLE);
-
-                    holder.rightimg.setImageBitmap(convertStringToIcon(mi.getMsg()));
-                    holder.rightimgtime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-
-                    holder.left.setVisibility(View.GONE);
-                    holder.lefttime.setVisibility(View.GONE);
-                    holder.right.setVisibility(View.GONE);
-                    holder.righttime.setVisibility(View.GONE);
-
                 }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
@@ -826,18 +708,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }else {//对面发的
                 if(mi.getType().equals("0")){//图片
-                    holder.leftimg.setVisibility(View.VISIBLE);
-                    holder.leftimgtime.setVisibility(View.VISIBLE);
-                    holder.rightimg.setVisibility(View.GONE);
-                    holder.rightimgtime.setVisibility(View.GONE);
-                    holder.leftimg.setImageBitmap(convertStringToIcon(mi.getMsg()));
-                    holder.leftimgtime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-
-                    holder.left.setVisibility(View.GONE);
-                    holder.lefttime.setVisibility(View.GONE);
-                    holder.right.setVisibility(View.GONE);
-                    holder.righttime.setVisibility(View.GONE);
-
                 }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
@@ -859,142 +729,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         holder.leftsign.setText("签名不通过"+",标识："+mi.getTxID());
                         holder.leftsign.setTextColor(Color.RED);
                     }
-                  //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
+                    //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
 
-                   // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
-
+                    // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
                 }
             }
             return view;
         }
     }
 
-    class MessageHolder{
-        public TextView left;
-        public TextView right;
-        public TextView lefttime;
-        public TextView righttime;
-        public TextView leftsign;
-        public TextView rightsign;
+    //获取文件路径
+    public String getpath() throws IOException {
 
-
-
-        private TextView rightimgtime;
-        private TextView leftimgtime;
-        private ImageView rightimg;
-        private ImageView leftimg;
-
+            InputStream inputStream = getResources().openRawResource(R.raw.x);
+            File outFile = new File(getFilesDir(), "pub"); // 确保使用正确的文件扩展名
+            FileOutputStream outputStream = new FileOutputStream(outFile);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            outputStream.close();
+            inputStream.close();
+            String filePath = outFile.getAbsolutePath(); // 现在你可以获取文件路径
+        return filePath;
     }
-
-
-
-
-
-
-
-    /**
-     * string转成bitmap
-     * @param st
-     * @return
-     */
-    private Bitmap convertStringToIcon(String st){
-        Bitmap bitmap = null;
-        try
-        {
-            byte[] bitmapArray;
-            bitmapArray = Base64.decode(st, Base64.DEFAULT);
-            bitmap = BitmapFactory.decodeByteArray(bitmapArray, 0,bitmapArray.length);
-            return bitmap;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-
-
-   
-
-//传1个参数
-private void postOne(String url,JSONObject jsonObject) {
-    RequestQueue queue = Volley.newRequestQueue(this);
-
-    // 在函数内部生成 JSON 对象
-   // JSONObject jsonObject = new JSONObject();
-
- /*   try {
-        // 添加键值对到 JSON 对象
-        jsonObject.put(key, value);
-
-    } catch (JSONException e) {
-        e.printStackTrace();
-    }*/
-
-    StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    // 假设服务器返回一个含有TXID的JSON字符串
-                    // 直接将响应的字符串作为 TXID
-
-                    res=response;
-                    Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
-                    Log.d("测试PostOne", "url = " + url);
-                    Log.d("测试PostOne", "response =" + res);
-
-                    Log.d("测试PostOne", "执行成功");
-                }
-
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(MainActivity.this, "请求失败: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.d("ppp", error.getMessage());
-                }
-            }) {
-        @Override
-        public byte[] getBody() {
-            // 返回 JSON 格式的请求体
-            return jsonObject.toString().getBytes();
-        }
-
-        @Override
-        public String getBodyContentType() {
-            return "application/json; charset=utf-8";
-        }
-    };
-
-    queue.add(jsonRequest);
 }
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

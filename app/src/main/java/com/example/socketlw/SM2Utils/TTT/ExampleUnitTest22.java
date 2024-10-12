@@ -1,6 +1,6 @@
-package com.example.socketlw;
+package com.example.socketlw.SM2Utils.TTT;
 
-import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.CertificateGenerator;
 import com.example.socketlw.SM2Utils.Util;
 
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
@@ -10,63 +10,29 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
-
 import org.bouncycastle.pqc.legacy.math.linearalgebra.ByteUtils;
 import org.bouncycastle.util.Arrays;
+import org.junit.Test;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+public class ExampleUnitTest22 {
+    private ECDomainParameters ecParams; // SM2曲线参数
+    private byte[] publicKeySM2 = new byte[0];
+    private byte[] privateKeySM2 = new byte[0];
+    String chainS="560AF94CC1C8BB9AE6986502136B425D";
+    private byte[] chainroot = chainS.getBytes();
 
-public class Update {
-
-  //  private ECDomainParameters ecParams; // SM2曲线参数
-    public static  byte[] publicKeySM2 = new byte[0];
-    public static  byte[] privateKeySM2 = new byte[0];
-    public static  String chainS="560AF94CC1C8BB9AE6986502136B425D";
-    //private byte[] chainroot = chainS.getBytes();
-
-
-    public Update( byte[] publicKeySM2, byte[] privateKeySM2, String chainS) {
-        this.publicKeySM2 = publicKeySM2;
-        this.privateKeySM2 = privateKeySM2;
-        this.chainS = chainS;
-    }
-
-    public static void updateAll(int i){
-        //产生密钥
-        byte[][] key = SM2Util.generateKeyPair();
-
-        System.out.println("publicKeySM2:"+ Util.byte2HexStr(publicKeySM2));
-        System.out.println("privateKeySM2:"+ Util.byte2HexStr(privateKeySM2));
-        byte[] chainroot = chainS.getBytes();
-
-        X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
-        BigInteger curveOrder = x9.getN();
-            byte[]hash=Hashpkichain(publicKeySM2,i,chainroot);
-            BigInteger d = new BigInteger(1, privateKeySM2);
-
-            //将前一部分哈希转为Integer
-            //截取哈希的前半部分和后半部分
-            int midIndex = hash.length / 2;
-            byte[] firstHalf = Arrays.copyOfRange(hash, 0, midIndex); // 前半部分
-            byte[] secondHalf = Arrays.copyOfRange(hash, midIndex, hash.length); // 后半部分
-            BigInteger d2 = new BigInteger(1, firstHalf);
-
-            System.out.println("i="+i);
-            //调用公钥推导
-            byte[] newPk=derivePk(publicKeySM2,d2);
-            System.out.println("newPk="+Util.byte2HexStr(newPk));
-            publicKeySM2=newPk;
-            //调用私钥派生算法
-            byte[] newSk=deriveSk(d,d2,curveOrder);
-            System.out.println("newsk="+Util.byte2HexStr(newSk));
-            privateKeySM2=newSk;
-            chainS=Util.byte2HexStr(secondHalf);
-
-
-
+    @Test
+    public void addition_isCorrect() throws Exception {
+       // CertificateGenerator.verifyCert();
     }
 
     // 生成哈希
@@ -74,7 +40,7 @@ public class Update {
         //切割公钥
         int midIndex1 = publicKeySM2.length / 2;
         byte[] firstHalfpublicKeySM2 = Arrays.copyOfRange(publicKeySM2, 0, midIndex1); // 前半部分
-        // System.out.println("firstHalfpublicKeySM2:"+Util.byte2HexStr(firstHalfpublicKeySM2));
+       // System.out.println("firstHalfpublicKeySM2:"+Util.byte2HexStr(firstHalfpublicKeySM2));
         // 创建哈希实例
         SM3Digest digest = new SM3Digest();
         // 准备输入字节数组
@@ -88,7 +54,7 @@ public class Update {
         digest.update(input, 0, input.length);// 32 字节（256 位）
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
-        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));
+       // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));
         return hash;
     }
 
@@ -96,14 +62,14 @@ public class Update {
     // 将字节数组转换为椭圆曲线公钥
     public static ECPoint convertToPublicKey(byte[] publicKeySM2) {
         // 打印公钥字节数组
-        //   System.out.println("Public Key (Hex): " + Util.byte2HexStr(publicKeySM2));
+     //   System.out.println("Public Key (Hex): " + Util.byte2HexStr(publicKeySM2));
         X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
         ECCurve mCurve = x9.getCurve();
         // 添加前缀
         byte[] fullPublicKey = new byte[publicKeySM2.length + 1];
         fullPublicKey[0] = 0x04;  // 添加未压缩前缀
         System.arraycopy(publicKeySM2, 0, fullPublicKey, 1, publicKeySM2.length);
-        //   System.out.println("fullPublicKey: " + Util.byte2HexStr(fullPublicKey));
+     //   System.out.println("fullPublicKey: " + Util.byte2HexStr(fullPublicKey));
         return mCurve.decodePoint(fullPublicKey);  // 解码公钥点
     }
 
@@ -122,7 +88,7 @@ public class Update {
         if (GskHB.length == 65) {
             GskHB = ByteUtils.subArray(GskHB, 1, GskHB.length);
         }
-        //  System.out.println("skHB:"+Util.byte2HexStr(skHB));
+      //  System.out.println("skHB:"+Util.byte2HexStr(skHB));
         System.out.println("GSkHB:"+Util.byte2HexStr(GskHB));
 
         return skHB;
@@ -132,7 +98,7 @@ public class Update {
     // 正确的推导新的公钥
     public static byte[] derivePk(byte[] publicKeySM2, BigInteger d2) {
         //将pk乘以哈希
-        ECPoint P= convertToPublicKey(publicKeySM2);
+        ECPoint P= ExampleUnitTest22.convertToPublicKey(publicKeySM2);
         ECPoint P2 = (new FixedPointCombMultiplier()).multiply(P, d2);
         byte[] p2B = P2.getEncoded(false);
         if (p2B.length == 65) {
@@ -141,5 +107,4 @@ public class Update {
         System.out.println("pk乘hash:"+Util.byte2HexStr(p2B));
         return p2B;
     }
-
 }
