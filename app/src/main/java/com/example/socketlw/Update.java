@@ -29,9 +29,9 @@ public class Update {
 
 
     public Update( byte[] publicKeySM2, byte[] privateKeySM2, String chainS) {
-        this.publicKeySM2 = publicKeySM2;
-        this.privateKeySM2 = privateKeySM2;
-        this.chainS = chainS;
+        Update.publicKeySM2 = publicKeySM2;
+        Update.privateKeySM2 = privateKeySM2;
+        Update.chainS = chainS;
     }
 
     public static void updateAll(int i){

@@ -9,7 +9,7 @@ public class JsonPut {
 
     public static JSONObject PutJson(JSONObject jsonObject, String key, String value){
         try {
-            jsonObject.put("key", value);
+            jsonObject.put(key, value);
             return jsonObject;
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -18,7 +18,7 @@ public class JsonPut {
 
     public static JSONObject PutJson(JSONObject jsonObject, String key, int value){
         try {
-            jsonObject.put("key", value);
+            jsonObject.put(key, value);
             return jsonObject;
         } catch (JSONException e) {
             throw new RuntimeException(e);
