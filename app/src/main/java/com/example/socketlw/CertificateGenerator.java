@@ -204,7 +204,7 @@ public class CertificateGenerator {
 
         byte[] PKK=cert.getPublicKey().getEncoded();
         System.out.println("未截取公钥："+Util.byte2HexStr(PKK));
-        int headerLength = 17;
+        int headerLength = 20;
         byte[] keyBits = new byte[PKK.length - headerLength];
        System.arraycopy(PKK, headerLength, keyBits, 0, keyBits.length);
         System.out.println("截取后的公钥："+Util.byte2HexStr(keyBits));
