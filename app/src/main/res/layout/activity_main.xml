@@ -129,11 +129,11 @@
             android:text="更新公钥" />
 
         <Button
-            android:id="@+id/certtest"
+            android:id="@+id/verifysign"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="获取证书" />
+            android:text="获取公钥验证签名" />
 
 
     </LinearLayout>

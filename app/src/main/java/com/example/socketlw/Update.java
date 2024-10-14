@@ -36,11 +36,10 @@ public class Update {
 
     public static void updateAll(int i){
         //产生密钥
-        byte[][] key = SM2Util.generateKeyPair();
-
+        System.out.println("chainS的长度为"+chainS.length());
         System.out.println("publicKeySM2:"+ Util.byte2HexStr(publicKeySM2));
         System.out.println("privateKeySM2:"+ Util.byte2HexStr(privateKeySM2));
-        byte[] chainroot = chainS.getBytes();
+        byte[] chainroot = Util.hexStr2Bytes(chainS);
 
         X9ECParameters x9 = ECNamedCurveTable.getByName("sm2p256v1");
         BigInteger curveOrder = x9.getN();
@@ -64,6 +63,7 @@ public class Update {
             System.out.println("newsk="+Util.byte2HexStr(newSk));
             privateKeySM2=newSk;
             chainS=Util.byte2HexStr(secondHalf);
+        System.out.println("chainS的长度为"+chainS.length());
 
 
 

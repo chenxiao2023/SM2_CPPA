@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button getpkcert;
     private Button InitialUser;
     private Button updatePk;
+    private Button verifysign;
+
     private int StartPort;
     private boolean isContinue = true,isServer = false;
     private String message = "",userSendMsg = "",titletext = "";
@@ -112,12 +114,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] privateKeySM2 = new byte[0];
     private int pkIndex=0;
     //从服务器接收的公钥。
-    private byte[] publicKeySM2F = new byte[0];
+    private byte[] publicKeySM2Res = new byte[0];
+    private byte[] publicKeySM2Cert= new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
     private String TxID="1";
     //对方消息中的的TxID
-    private String TxIDres="2";
+    private String TxIDres="";
+    private String Timeres="";
+    private String Msgres="";
+    private byte[] Signres=new byte[0];
+
     //http参数
     private String res="";
     private String CertString = "";
@@ -127,11 +134,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private  String urlinitialPK = "http://192.168.220.20:8080/InitialUser";
     private  String urlUpdatePK = "http://192.168.220.20:8080/updatePk";
+
+    private  String urlUpdatePKtest = "http://192.168.220.20:8080/updatepktest";
     //签名方取TxID
     private  String urlTxID =  "http://192.168.220.20:8080/mapgettxid";
     //从TxID取公钥
     private  String urlTxID2PublicKey = "http://192.168.220.20:8080/getpkcert";
-
+    private  String urlPk2cert = "http://192.168.220.20:8080/certpk";
 
     private String address1 = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
 
@@ -169,11 +178,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         privateKeySM2 = key[1];
         System.out.println("公钥为："+ Util.byte2HexStr(publicKeySM2));
         System.out.println("私钥为："+Util.byte2HexStr(privateKeySM2));
-
-            //String encodecert="3082013d3081e5a003020102020601928033abe2300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031313130303834325a170d3235313031323130303834325a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100a5b4792c75cdf7d4df2ca1370f15faa2ff8adeb1c7cbba7ce94ff98ec8f788c9186c3438482d0d027a00a77a78326639649df283a872dab3dee8c5c3877d5099300a06082a811ccf550183750347003044022038ad66a734221094f7bdd3b34efa00d05c29c3b2a2b37d79271bf428fd5575cd02200bd17e6cec99a02900b314c1df9b922626fe54a2b56509864bd3b713de94a2be";
+//        postOne(urlUpdatePKtest);
+//        String pkS="56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE";
+//        byte[] pk=Util.hexStr2Bytes(pkS);
+//        new Update(pk,privateKeySM2,"560AF94CC1C8BB9AE6986502136B425D");
+//        Update.updateAll(0);
+           //公钥对应AAAE9
+        // String encodecert="0x3082013d3081e5a00302010202060192867a79d7300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031323135323334365a170d3235313031333135323334365a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100d59f38f85b3f03c48f0b1a5f98a8c12d50f6d8b1a4194f27ad3c78710c76ca60ae597ebdb31e16934be2bc6d87d9207ff4688ff31310d97c8cb80d684dd2e05f300a06082a811ccf55018375034700304402206e67164ff9d08f53ac5d19518e5b16e5a779751d9168440014fd5a16b1a5ed6f02207e7e90614df3aac8e9d006761884dfae8f02d5ff5ab23982189e7705ac8e0c93";
+            //
+       // String encodecert=   "0x3082013e3081e5a003020102020601928a0968f4300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031333037353834355a170d3235313031343037353834355a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100e9229eb61c759a5b3484d7741a9352559f6066f25c0ca818e093b325fe2cb8b295a97883a8d047a427a0211e83e2934454bb1dbe12fd3072810e4179eaf6ac9f300a06082a811ccf550183750348003045022100ca892445bfb3b81075534aa85c3f6b65925219260b449003be1be146b371ce4c02206baea51db96e0cb4b7773e1a86ebd04a416ee308dc2da9fb5b98994b0219991f";
+         //String encodecert="0x3082013d3081e5a003020102020601928033abe2300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031313130303834325a170d3235313031323130303834325a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100a5b4792c75cdf7d4df2ca1370f15faa2ff8adeb1c7cbba7ce94ff98ec8f788c9186c3438482d0d027a00a77a78326639649df283a872dab3dee8c5c3877d5099300a06082a811ccf550183750347003044022038ad66a734221094f7bdd3b34efa00d05c29c3b2a2b37d79271bf428fd5575cd02200bd17e6cec99a02900b314c1df9b922626fe54a2b56509864bd3b713de94a2be";
            // String encodecert=makeCert("FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
           //  System.out.println("输出的证书为："+encodecert);
-           //  CertificateGenerator.verifyCert(encodecert);
+//        try {
+//            CertificateGenerator.verifyCert(encodecert);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
 
         //更新本地公钥
@@ -196,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sendmsgbt = (Button) findViewById(R.id.sendmsgbt);
         mapgettxid = (Button) findViewById(R.id.mapgettxid);
         getpkcert = (Button) findViewById(R.id.getpkcert);
+        verifysign = (Button) findViewById(R.id.verifysign);
         InitialUser = (Button) findViewById(R.id.InitialUser);
         updatePk = (Button) findViewById(R.id.updatePk);
 
@@ -208,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sendmsgbt.setOnClickListener(this);
         mapgettxid.setOnClickListener(this);
         getpkcert.setOnClickListener(this);
+        verifysign.setOnClickListener(this);
         updatePk.setOnClickListener(this);
         InitialUser.setOnClickListener(this);
        // sendimg.setOnClickListener(this);
@@ -318,10 +341,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 postOne(urlTxID);
                 break;
             case R.id.getpkcert://发送TxID，获取公钥
-               // String pk="FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
-               // publicKeySM2F=Util.hexStr2Bytes(pk);
-               // showres.setText(Util.byte2HexStr(publicKeySM2F));
+                // String pk="FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
+                // publicKeySM2F=Util.hexStr2Bytes(pk);
+                // showres.setText(Util.byte2HexStr(publicKeySM2F));
                 postOne(urlTxID2PublicKey);
+                break;
+            case R.id.verifysign://发送TxID，获取公钥
+
+              //  verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
+                verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);//测试用的
+                if(verifySign){
+                    System.out.println("签名验证成功");
+                    showres.setText("签名通过");
+                    showres.setTextColor(Color.GREEN);
+                }else{
+                    System.out.println("签名验证失败");
+                    showres.setText("签名不通过");
+                    showres.setTextColor(Color.RED);
+                }
                 break;
             case R.id.updatePk://更新公钥
                 postOne(urlUpdatePK);
@@ -438,6 +475,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
                         showres.setText("接收的消息：签名："+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+",公钥："+Util.byte2HexStr(Base64.decode(base64PublicKey, Base64.NO_WRAP))+",标识："+json.getString("TxID"));
                         TxIDres=json.getString("TxID");
+                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
+                        Timeres=json.getString("times");
+                        Msgres=json.getString("msg");
+                        Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
+
                         //messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
@@ -552,6 +594,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                       //  titletext = json.getString("peoplen");
                         TxIDres=json.getString("TxID");
+                        Timeres=json.getString("times");
+                        Msgres=json.getString("msg");
+                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
+                        Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
                         handler.sendEmptyMessage(1);
                         showres.setText("接收的消息：签名："+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+",公钥："+Util.byte2HexStr(Base64.decode(base64PublicKey, Base64.NO_WRAP))+",标识："+json.getString("TxID"));
                      //   messageAdapte.notifyDataSetChanged();//通知数据源发生变化
@@ -614,12 +660,7 @@ private void postOne(String url) {
                         case "http://192.168.220.20:8080/getpkcert":
                             //publicKeySM2F=Util.hexStr2Bytes(response);
                             try {
-                                String pkInCert=CertificateGenerator.verifyCert(response);
-                                if(!pkInCert.equals(Util.byte2HexStr(publicKeySM2F))){
-                                    showres.setText("证书中的公钥：pkInCert"+"对方发的公钥："+publicKeySM2F+"验证不通过！");
-                                }else{
-                                    showres.setText("证书中的公钥：pkInCert"+"对方发的公钥："+publicKeySM2F+"验证通过！");
-                                }
+                                publicKeySM2Cert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(response));
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -629,12 +670,26 @@ private void postOne(String url) {
                            // TxID=response;
                             showres.setText(response);
                             System.out.println("初始化公钥为："+Util.byte2HexStr(publicKeySM2));
-                            pkIndex =1;
                             break;
                         case "http://192.168.220.20:8080/updatePk":
                             //TxID=response;
                             showres.setText(response);
-                            pkIndex =pkIndex+1;
+
+                            break;
+                        case "http://192.168.220.20:8080/certpk":
+                            //TxID=response;
+                            showres.setText(response);
+                            try {
+                                String pkInCert=CertificateGenerator.verifyCert(response);
+                                System.out.println("pkInCert="+pkInCert);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                            break;
+                        case "http://192.168.220.20:8080/updatepktest":
+                            //TxID=response;
+                            showres.setText(response);
+                            System.out.println("收到服务器的公钥为："+response);
                             break;
                         default:
                             System.out.println("Url错误！！");
@@ -686,7 +741,16 @@ private void postOne(String url) {
                     publicKeySM2=Update.publicKeySM2;
                     privateKeySM2=Update.privateKeySM2;
                     chain=Update.chainS;
-
+                    pkIndex =pkIndex+1;
+                    break;
+                case "http://192.168.220.20:8080/certpk":
+                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
+                    break;
+                case "http://192.168.220.20:8080/updatepktest":
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address1);
+                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",0);
+                    jsonObject=JsonPut.PutJson(jsonObject,"key","56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE");
+                    jsonObject=JsonPut.PutJson(jsonObject,"chain","560AF94CC1C8BB9AE6986502136B425D");
                     break;
                 default:
                     System.out.println("Url错误！！");
@@ -799,13 +863,13 @@ private void postOne(String url) {
                     holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                    if(verifySign){
+                   /* if(verifySign){
                         holder.leftsign.setText("签名通过"+",标识："+mi.getTxID());
                         holder.leftsign.setTextColor(Color.GREEN);
                     }else {
                         holder.leftsign.setText("签名不通过"+",标识："+mi.getTxID());
                         holder.leftsign.setTextColor(Color.RED);
-                    }
+                    }*/
                     //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
 
                     // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
