@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.mapgettxid://发送Address获取TxID
-                TxID="测试用的TxID";
+               //TxID="测试用的TxID";
                // showres.setText(TxID);
                 postOne(urlTxID);
                 break;
@@ -348,8 +348,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.verifysign://发送TxID，获取公钥
 
-              //  verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
-                verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);//测试用的
+                verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
+                //verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
                 if(verifySign){
                     System.out.println("签名验证成功");
                     showres.setText("签名通过");
@@ -664,20 +664,20 @@ private void postOne(String url) {
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
-
+                            showres.setText(response);
                             break;
                         case "http://192.168.220.20:8080/InitialUser":
-                           // TxID=response;
+
                             showres.setText(response);
                             System.out.println("初始化公钥为："+Util.byte2HexStr(publicKeySM2));
                             break;
                         case "http://192.168.220.20:8080/updatePk":
-                            //TxID=response;
+
                             showres.setText(response);
 
                             break;
                         case "http://192.168.220.20:8080/certpk":
-                            //TxID=response;
+
                             showres.setText(response);
                             try {
                                 String pkInCert=CertificateGenerator.verifyCert(response);
@@ -687,7 +687,7 @@ private void postOne(String url) {
                             }
                             break;
                         case "http://192.168.220.20:8080/updatepktest":
-                            //TxID=response;
+
                             showres.setText(response);
                             System.out.println("收到服务器的公钥为："+response);
                             break;
@@ -722,19 +722,20 @@ private void postOne(String url) {
            // jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
             switch (url){
                 case "http://192.168.220.20:8080/mapgettxid":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
                     break;
                 case "http://192.168.220.20:8080/getpkcert"://给txID返回证书
-                    jsonObject=JsonPut.PutJson(jsonObject,"txid",TxID);//测试用的，正常情况下是TxIDres
+                   // jsonObject=JsonPut.PutJson(jsonObject,"txid",TxID);//测试用的，正常情况下是TxIDres
+                    jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
                     break;
                 case "http://192.168.220.20:8080/InitialUser":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address1);
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
                     jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",pkIndex);
                     jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
                     jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
                     break;
                 case "http://192.168.220.20:8080/updatePk":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address1);
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
                     jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",pkIndex);
                     new Update(publicKeySM2,privateKeySM2,chain);
                     Update.updateAll(pkIndex);
@@ -747,7 +748,7 @@ private void postOne(String url) {
                     jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
                     break;
                 case "http://192.168.220.20:8080/updatepktest":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address1);
+                    jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
                     jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",0);
                     jsonObject=JsonPut.PutJson(jsonObject,"key","56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE");
                     jsonObject=JsonPut.PutJson(jsonObject,"chain","560AF94CC1C8BB9AE6986502136B425D");
