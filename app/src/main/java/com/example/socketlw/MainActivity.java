@@ -73,6 +73,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.socketlw.MainUse.MessageHolder;
 import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.SM2Utils.User;
 import com.example.socketlw.SM2Utils.Util;
 
 import java.util.HashMap;
@@ -110,15 +111,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static ServerSocket server;
     private static List<PrintWriter> allOut; //存放所有客户端的输出流的集合，用于广播
     //SM2参数
-    private byte[] publicKeySM2 = new byte[0];
-    private byte[] privateKeySM2 = new byte[0];
-    private int pkIndex=0;
+    private User userMyself;
+    private User userOther;
     //从服务器接收的公钥。
-    private byte[] publicKeySM2Res = new byte[0];
-    private byte[] publicKeySM2Cert= new byte[0];
+
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
-    private String TxID="1";
+
     //对方消息中的的TxID
     private String TxIDres="";
     private String Timeres="";
@@ -126,11 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] Signres=new byte[0];
 
     //http参数
-    private String res="";
-    private String CertString = "";
-    //验证方取证书
-    private String filePath="/data/user/0/com.example.socketlw/files/pub";
 
+    //验证方取证书
 
     private  String urlinitialPK = "http://192.168.220.20:8080/InitialUser";
     private  String urlUpdatePK = "http://192.168.220.20:8080/updatePk";
@@ -174,10 +170,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
         //SM2的初始化
         byte[][] key = SM2Util.generateKeyPair();
-        publicKeySM2 = key[0];
-        privateKeySM2 = key[1];
-        System.out.println("公钥为："+ Util.byte2HexStr(publicKeySM2));
-        System.out.println("私钥为："+Util.byte2HexStr(privateKeySM2));
+        userMyself=new User(key[0],key[1],0);
+        userOther=new User();
+        System.out.println("公钥为："+ Util.byte2HexStr(userMyself.getPublicKeySM2()));
+        System.out.println("私钥为："+Util.byte2HexStr(userMyself.getPrivateKeySM2()));
 //        postOne(urlUpdatePKtest);
 //        String pkS="56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE";
 //        byte[] pk=Util.hexStr2Bytes(pkS);
@@ -316,28 +312,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(MainActivity.this,"发送消息不能为空",Toast.LENGTH_LONG).show();
                         return ;
                     }
-                    if(TxID==null||"".equals(TxID)){
+                    if(userMyself.getTxID()==null||"".equals(userMyself.getTxID())){
                         Toast.makeText(MainActivity.this,"请先获取TxID",Toast.LENGTH_LONG).show();
                         return ;
                     }
                     long Ltimes = System.currentTimeMillis();
-                    sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+                    sign=SM2Util.sign(userMyself.getPrivateKeySM2(),(message+Ltimes+userMyself.getTxID()).getBytes() );
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
                     message = sendmsgtext.getText().toString();
-                    String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
+                    String base64PublicKey = Base64.encodeToString(userMyself.getPublicKeySM2(), Base64.NO_WRAP);
                     String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
-                    datas.add(new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1"));
-                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
+                    datas.add(new MessageInfor(message,Ltimes,mID,sign,userMyself.getPublicKeySM2(),userMyself.getTxID(),"1"));
+                    sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+userMyself.getTxID()+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
-                    showres.setText("发送过去的：签名："+Util.byte2HexStr(sign)+",公钥："+Util.byte2HexStr(publicKeySM2)+",标识："+TxID);
+                    showres.setText("发送过去的：签名："+Util.byte2HexStr(sign)+",公钥："+Util.byte2HexStr(userMyself.getPublicKeySM2())+",标识："+userMyself.getTxID());
                 }else {//客户端
                     sendMsgText();
-                    showres.setText("发送过去的：签名："+Util.byte2HexStr(sign)+",公钥："+Util.byte2HexStr(publicKeySM2)+",标识："+TxID);
+                    showres.setText("发送过去的：签名："+Util.byte2HexStr(sign)+",公钥："+Util.byte2HexStr(userMyself.getPublicKeySM2())+",标识："+userMyself.getTxID());
                 }
                 break;
             case R.id.mapgettxid://发送Address获取TxID
-               //TxID="测试用的TxID";
-               // showres.setText(TxID);
                 postOne(urlTxID);
                 break;
             case R.id.getpkcert://发送TxID，获取公钥
@@ -348,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.verifysign://发送TxID，获取公钥
 
-                verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
+                verifySign=SM2Util.verifySign(userOther.getPublicKeySM2Cert(), (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
                 //verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
                 if(verifySign){
                     System.out.println("签名验证成功");
@@ -475,7 +469,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
                         showres.setText("接收的消息：签名："+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+",公钥："+Util.byte2HexStr(Base64.decode(base64PublicKey, Base64.NO_WRAP))+",标识："+json.getString("TxID"));
                         TxIDres=json.getString("TxID");
-                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
@@ -596,7 +589,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         TxIDres=json.getString("TxID");
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
-                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
                         handler.sendEmptyMessage(1);
                         showres.setText("接收的消息：签名："+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+",公钥："+Util.byte2HexStr(Base64.decode(base64PublicKey, Base64.NO_WRAP))+",标识："+json.getString("TxID"));
@@ -621,20 +613,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this,"发送消息不能为空",Toast.LENGTH_LONG).show();
             return ;
         }
-        if(TxID==null||"".equals(TxID)){
+        if(userMyself.getTxID()==null||"".equals(userMyself.getTxID())){
             Toast.makeText(MainActivity.this,"请先获取TxID",Toast.LENGTH_LONG).show();
             return ;
         }
         long Ltimes = System.currentTimeMillis();
-        sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
-       //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
+        sign=SM2Util.sign(userMyself.getPrivateKeySM2(),(message+Ltimes+userMyself.getTxID()).getBytes() );
+       //=SM2Util.verifySign(userMyself.getPublicKeySM2(), (message+Ltimes+userMyself.getTxID()).getBytes(), sign);
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
        // Log.d("客户端发消息","verifySign="+verifySign);
        // signature=sign.toString();
-        MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1");//消息 时间戳 id
-        String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
+        MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,userMyself.getPublicKeySM2(),userMyself.getTxID(),"1");//消息 时间戳 id
+        String base64PublicKey = Base64.encodeToString(userMyself.getPublicKeySM2(), Base64.NO_WRAP);
         String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
-        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"id\":\""+mID+"\"}";
+        userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+userMyself.getTxID()+"\",\"id\":\""+mID+"\"}";
         datas.add(m);
         messageAdapte.notifyDataSetChanged();//通知数据源发生变化
         sendmsgtext.setText("");
@@ -648,19 +640,18 @@ private void postOne(String url) {
             new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                   // res=response;
-                    Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "请求成功: response = " + response, Toast.LENGTH_SHORT).show();
                     Log.d("测试PostOne", "url = " + url);
                     Log.d("测试PostOne", "response =" + response);
                     switch (url){
                         case "http://192.168.220.20:8080/mapgettxid":
-                            TxID=response;
+                            userMyself.setTxID(response);
                             showres.setText(response);
                             break;
                         case "http://192.168.220.20:8080/getpkcert":
                             //publicKeySM2F=Util.hexStr2Bytes(response);
                             try {
-                                publicKeySM2Cert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(response));
+                                userOther.setPublicKeySM2Cert(Util.hexStr2Bytes(CertificateGenerator.verifyCert(response)));
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -669,7 +660,7 @@ private void postOne(String url) {
                         case "http://192.168.220.20:8080/InitialUser":
 
                             showres.setText(response);
-                            System.out.println("初始化公钥为："+Util.byte2HexStr(publicKeySM2));
+                            System.out.println("初始化公钥为："+Util.byte2HexStr(userMyself.getPublicKeySM2()));
                             break;
                         case "http://192.168.220.20:8080/updatePk":
 
@@ -695,7 +686,7 @@ private void postOne(String url) {
                             System.out.println("Url错误！！");
 
                     }
-                    CertString=response;
+
                 }
             },
             new Response.ErrorListener() {
@@ -730,22 +721,22 @@ private void postOne(String url) {
                     break;
                 case "http://192.168.220.20:8080/InitialUser":
                     jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
-                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",pkIndex);
-                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
+                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",userMyself.getPkIndex());
+                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(userMyself.getPublicKeySM2()));
                     jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
                     break;
                 case "http://192.168.220.20:8080/updatePk":
                     jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
-                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",pkIndex);
-                    new Update(publicKeySM2,privateKeySM2,chain);
-                    Update.updateAll(pkIndex);
-                    publicKeySM2=Update.publicKeySM2;
-                    privateKeySM2=Update.privateKeySM2;
+                    jsonObject=JsonPut.PutJson(jsonObject,"pkIndex",userMyself.getPkIndex());
+                    new Update(userMyself.getPublicKeySM2(),userMyself.getPrivateKeySM2(),chain);
+                    Update.updateAll(userMyself.getPkIndex());
+                    userMyself.setPublicKeySM2(Update.publicKeySM2);
+                    userMyself.setPrivateKeySM2(Update.privateKeySM2);
                     chain=Update.chainS;
-                    pkIndex =pkIndex+1;
+                    userMyself.setPkIndex(userMyself.getPkIndex()+1);
                     break;
                 case "http://192.168.220.20:8080/certpk":
-                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
+                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(userMyself.getPublicKeySM2()));
                     break;
                 case "http://192.168.220.20:8080/updatepktest":
                     jsonObject=JsonPut.PutJson(jsonObject,"address",address2);
