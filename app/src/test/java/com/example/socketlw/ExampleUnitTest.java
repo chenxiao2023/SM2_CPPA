@@ -18,8 +18,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.Provider;
@@ -37,7 +43,7 @@ import com.example.socketlw.SM2Utils.Util;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class ExampleUnitTest {
+public class ExampleUnitTest extends AppCompatActivity {
     private ECDomainParameters ecParams; // SM2曲线参数
     private byte[] publicKeySM2 = new byte[0];
     private byte[] privateKeySM2 = new byte[0];
@@ -46,17 +52,6 @@ public class ExampleUnitTest {
 
     @Test
     public void addition_isCorrect() {
-// 注册 Bouncy Castle 提供者
-
-        String myTBS="3081E5A0030201020206019280C0345E300A06082A811CCF55018375302B310F300D06035504030C0649737375657231183016060355040A0C0F4D79204F7267616E697A6174696F6E301E170D3234313031313132343231325A170D3235313031323132343231325A302C3110300E06035504030C075375626A65637431183016060355040A0C0F4D79204F7267616E697A6174696F6E304F300A06082A811CCF5501822D034100FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
-        String hisTBS="3081e5a0030201020206019280c0345e300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031313132343231325a170d3235313031323132343231325a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100fc5b2396034b0c1807eed779b7d20f8c97e22ce4e6ba18156458bbcf76172ab9d0074745eb713cddcb5c21a95a79631ee626f8f2266ef7bc9d8df2b8c652d530";
-        if(myTBS.equals(hisTBS)){
-            System.out.println("TBS相等");
-        }else{
-            System.out.println("TBS不相等");
-        }
-
-
 
 
 
