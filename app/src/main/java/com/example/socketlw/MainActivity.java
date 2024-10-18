@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
         System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
 
-        clearFileOnStartup();
+
 //        postOne(urlUpdatePKtest);
 //        String pkS="56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE";
 //        byte[] pk=Util.hexStr2Bytes(pkS);
@@ -378,6 +378,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 System.out.println("verifySign time:"+(duration+"ms"));
             }*/
                 //verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
+
+                //判断是否超时
+                long Ltimes = System.currentTimeMillis();
+                long nowTime = Long.parseLong(Timeres);
+                if((nowTime-Ltimes)/1000>60){
+
+                System.out.println("超时");
+                break;
+            }
                 if(verifySign){
                     System.out.println("签名验证成功");
                     showres.setText("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2Cert)+"\n结果="+"签名通过");
@@ -713,9 +722,9 @@ private void postOne(String url) {
                                 publicKeySM2Cert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(response));
                                 X509Certificate cert=certRecoverfromtx(response);
                                 System.out.println("cert="+cert.toString());
-                                showres.setText("SM2_PublicKey_Cert="+Util.byte2HexStr(publicKeySM2Cert));
+                                showres.setText("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2Cert));
                                 writeToInternalStorage("---------GetSM2_Publickey--------");
-                                writeToInternalStorage("SM2_PublicKey_Cert="+Util.byte2HexStr(publicKeySM2Cert));
+                                writeToInternalStorage("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2Cert));
                                 writeToInternalStorage("---------------END---------------");
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
@@ -732,7 +741,7 @@ private void postOne(String url) {
                         case "http://192.168.220.20:8080/keyDerive":
                             showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                             writeToInternalStorage("-----------SM2_KeyDerive---------");
-                            writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain:"+chain);
+                            writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                             writeToInternalStorage("---------------END---------------");
                             break;
 //                        case "http://192.168.220.20:8080/certpk":

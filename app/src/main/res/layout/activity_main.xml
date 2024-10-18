@@ -93,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="发送地址获取TxID" />
+            android:text="获取TxID" />
 
         <Button
             android:id="@+id/getpkcert"
@@ -107,7 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="发送初始公钥" />
+            android:text="初始化用户" />
     </LinearLayout>
 
     <LinearLayout
@@ -126,14 +126,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="更新公钥" />
+            android:text="密钥更新" />
 
         <Button
             android:id="@+id/verifysign"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="获取公钥验证签名" />
+            android:text="验证签名" />
         <Button
             android:id="@+id/showfile"
             android:layout_width="wrap_content"
