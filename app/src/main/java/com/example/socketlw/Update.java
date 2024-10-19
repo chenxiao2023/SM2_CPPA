@@ -181,7 +181,7 @@ public class Update {
         ECCurve mCurve = x9.getCurve();
         // 添加前缀
         byte[] fullPublicKey = new byte[publicKeySM2.length + 1];
-        fullPublicKey[0] = 0x04;  // 添加未压缩前缀
+        fullPublicKey[0] = 0x04;  // 添加未压缩前缀...
         System.arraycopy(publicKeySM2, 0, fullPublicKey, 1, publicKeySM2.length);
         //   System.out.println("fullPublicKey: " + Util.byte2HexStr(fullPublicKey));
         return mCurve.decodePoint(fullPublicKey);  // 解码公钥点
