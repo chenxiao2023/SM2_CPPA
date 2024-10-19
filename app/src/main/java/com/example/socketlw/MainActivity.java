@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button mapgettxid;
     private Button getpkcert;
     private Button InitialUser;
-    private Button updatePk;
+    private Button updateSk;
     private Button verifysign;
     private Button showFile;
 
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int keyIndex=0;
     //从服务器接收的公钥。
     private byte[] publicKeySM2Res = new byte[0];
-    private byte[] publicKeySM2Cert= new byte[0];
+    private byte[] publicKeySM2InCert= new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
     private String TxID="1";
@@ -130,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String Msgres="";
     private byte[] Signres=new byte[0];
 
+
+    //测试参数
+    private long startTime;
+    private long endTime;
     //http参数
     private String res="";
     private String CertString = "";
@@ -140,16 +145,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private  String urlinitialPK = "http://192.168.220.20:8080/InitialUser";
     private  String urlUpdatePK = "http://192.168.220.20:8080/keyDerive";
 
-  //  private  String urlUpdatePKtest = "http://192.168.220.20:8080/updatepktest";
+    //  private  String urlUpdatePKtest = "http://192.168.220.20:8080/updatepktest";
     //签名方取TxID
     private  String urlTxID =  "http://192.168.220.20:8080/getTxID";
     //从TxID取公钥
     private  String urlTxID2PublicKey = "http://192.168.220.20:8080/getPublickey";
     private  String urlPk2cert = "http://192.168.220.20:8080/certpk";
+    private  String urltestJson = "http://192.168.220.20:8080/testJson";
 
-    //private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址1
 
-    private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址2
+    private String address = "";//地址1
+
+    //  private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址2
     private String chain="560AF94CC1C8BB9AE6986502136B425D";
     // 生成证书
     private X509Certificate certificate;
@@ -179,7 +186,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         //SM2的初始化
+        startTime = System.nanoTime();
         byte[][] key = SM2Util.generateKeyPair();
+        endTime =System.nanoTime();
+        double duration = (endTime - startTime) / 1_000_0000.0;
+        writeToInternalStorage("----------SM2_GenerateKeyPair---------");
+        writeToInternalStorage("SM2_publickey="+key[0]);
+        writeToInternalStorage("SM2_privatekey="+key[1]);
+        writeToInternalStorage("耗时="+duration+"ms");
+        writeToInternalStorage("---------------END---------------");
+
+
+
+        //清空文件内容
+        clearFileOnStartup();
         //函数时间测试
       /*  for(int i=0;i<10;i++){
             long startTime = System.nanoTime();
@@ -191,34 +211,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         publicKeySM2 = key[0];
+        address=Util.byte2HexStr(Update.getAddress(publicKeySM2));
         privateKeySM2 = key[1];
         System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
         System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
 
+        postOne(urltestJson);
 
-//        postOne(urlUpdatePKtest);
-//        String pkS="56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE";
-//        byte[] pk=Util.hexStr2Bytes(pkS);
-//        new Update(pk,privateKeySM2,"560AF94CC1C8BB9AE6986502136B425D");
-//        Update.updateAll(0);
-           //公钥对应AAAE9
-        // String encodecert="0x3082013d3081e5a00302010202060192867a79d7300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031323135323334365a170d3235313031333135323334365a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100d59f38f85b3f03c48f0b1a5f98a8c12d50f6d8b1a4194f27ad3c78710c76ca60ae597ebdb31e16934be2bc6d87d9207ff4688ff31310d97c8cb80d684dd2e05f300a06082a811ccf55018375034700304402206e67164ff9d08f53ac5d19518e5b16e5a779751d9168440014fd5a16b1a5ed6f02207e7e90614df3aac8e9d006761884dfae8f02d5ff5ab23982189e7705ac8e0c93";
-            //
-       // String encodecert=   "0x3082013e3081e5a003020102020601928a0968f4300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031333037353834355a170d3235313031343037353834355a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100e9229eb61c759a5b3484d7741a9352559f6066f25c0ca818e093b325fe2cb8b295a97883a8d047a427a0211e83e2934454bb1dbe12fd3072810e4179eaf6ac9f300a06082a811ccf550183750348003045022100ca892445bfb3b81075534aa85c3f6b65925219260b449003be1be146b371ce4c02206baea51db96e0cb4b7773e1a86ebd04a416ee308dc2da9fb5b98994b0219991f";
-         //String encodecert="0x3082013d3081e5a003020102020601928033abe2300a06082a811ccf55018375302b310f300d06035504030c0649737375657231183016060355040a0c0f4d79204f7267616e697a6174696f6e301e170d3234313031313130303834325a170d3235313031323130303834325a302c3110300e06035504030c075375626a65637431183016060355040a0c0f4d79204f7267616e697a6174696f6e304f300a06082a811ccf5501822d034100a5b4792c75cdf7d4df2ca1370f15faa2ff8adeb1c7cbba7ce94ff98ec8f788c9186c3438482d0d027a00a77a78326639649df283a872dab3dee8c5c3877d5099300a06082a811ccf550183750347003044022038ad66a734221094f7bdd3b34efa00d05c29c3b2a2b37d79271bf428fd5575cd02200bd17e6cec99a02900b314c1df9b922626fe54a2b56509864bd3b713de94a2be";
-           // String encodecert=makeCert("FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530");
-          //  System.out.println("输出的证书为："+encodecert);
-//        try {
-//            CertificateGenerator.verifyCert(encodecert);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-
-
-        //更新本地公钥
-       /*
-        System.out.println("更新后的公钥："+Util.byte2HexStr(Update.publicKeySM2));
-        System.out.println("更新后的私钥："+Util.byte2HexStr(Update.privateKeySM2));*/
     }
 
     /**
@@ -237,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getpkcert = (Button) findViewById(R.id.getpkcert);
         verifysign = (Button) findViewById(R.id.verifysign);
         InitialUser = (Button) findViewById(R.id.InitialUser);
-        updatePk = (Button) findViewById(R.id.updatePk);
+        updateSk = (Button) findViewById(R.id.updateSk);
         showFile = (Button) findViewById(R.id.showfile);
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -250,10 +249,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mapgettxid.setOnClickListener(this);
         getpkcert.setOnClickListener(this);
         verifysign.setOnClickListener(this);
-        updatePk.setOnClickListener(this);
+        updateSk.setOnClickListener(this);
         InitialUser.setOnClickListener(this);
         showFile.setOnClickListener(this);
-       // sendimg.setOnClickListener(this);
+        // sendimg.setOnClickListener(this);
 
     }
     //定义判断权限申请的函数，在onCreat中调用就行
@@ -341,7 +340,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return ;
                     }
                     long Ltimes = System.currentTimeMillis();
+                    startTime = System.nanoTime();
                     sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+                    endTime =System.nanoTime();
+                    double duration = (endTime - startTime) / 1_000_0000.0;
+
+                    writeToInternalStorage("------------SM2_Sign-------------");
+                    writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+                    writeToInternalStorage("耗时="+duration+"ms");
+                    writeToInternalStorage("---------------END---------------");
+
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
                     message = sendmsgtext.getText().toString();
                     String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
@@ -356,55 +364,88 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.mapgettxid://发送Address获取TxID
-               //TxID="测试用的TxID";
-               // showres.setText(TxID);
                 postOne(urlTxID);
                 break;
             case R.id.getpkcert://发送TxID，获取公钥
-                // String pk="FC5B2396034B0C1807EED779B7D20F8C97E22CE4E6BA18156458BBCF76172AB9D0074745EB713CDDCB5C21A95A79631EE626F8F2266EF7BC9D8DF2B8C652D530";
-                // publicKeySM2F=Util.hexStr2Bytes(pk);
-                // showres.setText(Util.byte2HexStr(publicKeySM2F));
                 postOne(urlTxID2PublicKey);
                 break;
             case R.id.verifysign://发送TxID，获取公钥
-
-                verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
-                //函数时间测试
-               /* for(int i=0;i<10;i++){
-                long startTime = System.nanoTime();
-                verifySign=SM2Util.verifySign(publicKeySM2Cert, (Msgres+Timeres+TxIDres).getBytes(), Signres);
-                long endTime =System.nanoTime();
-                double duration = (endTime - startTime) / 1_000_0000.0;
-                System.out.println("verifySign time:"+(duration+"ms"));
-            }*/
-                //verifySign=SM2Util.verifySign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
 
                 //判断是否超时
                 long Ltimes = System.currentTimeMillis();
                 long nowTime = Long.parseLong(Timeres);
                 if((nowTime-Ltimes)/1000>60){
 
-                System.out.println("超时");
-                break;
-            }
+                    System.out.println("超时");
+                    break;
+                }
+
+                startTime = System.nanoTime();
+                verifySign=SM2Util.verifySign(publicKeySM2InCert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
+                endTime =System.nanoTime();
+                double duration = (endTime - startTime) / 1_000_0000.0;
+                //函数时间测试
+               /* for(int i=0;i<10;i++){
+                long startTime = System.nanoTime();
+                verifySign=SM2Util.verifySign(publicKeySM2InCert, (Msgres+Timeres+TxIDres).getBytes(), Signres);
+                long endTime =System.nanoTime();
+                double duration = (endTime - startTime) / 1_000_0000.0;
+                System.out.println("verifySign time:"+(duration+"ms"));
+            }*/
+
+
                 if(verifySign){
                     System.out.println("签名验证成功");
-                    showres.setText("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2Cert)+"\n结果="+"签名通过");
+                    showres.setText("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
                     writeToInternalStorage("----------SM2_VerifySign---------");
-                    writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2Cert)+"\n结果="+"签名通过");
+                    writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
+                    writeToInternalStorage("耗时="+duration+"ms");
                     writeToInternalStorage("---------------END---------------");
                     //showres.setTextColor(Color.GREEN);
                 }else{
                     System.out.println("签名验证失败");
-                    showres.setText("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2Cert)+"\n结果="+"签名不通过");
+                    showres.setText("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
                     writeToInternalStorage("---------SM2_VerifySign----------");
-                    writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2Cert)+"\n结果="+"签名不通过");
+                    writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
+                    writeToInternalStorage("耗时="+duration+"ms");
                     writeToInternalStorage("---------------END---------------");
-                   // showres.setTextColor(Color.RED);
+                    // showres.setTextColor(Color.RED);
                 }
                 break;
-            case R.id.updatePk://更新公钥
-                postOne(urlUpdatePK);
+            case R.id.updateSk://更新私钥
+                //postOne(urlUpdatePK);
+                new Update(publicKeySM2,privateKeySM2,chain);
+                byte[] chainbyte=Util.hexStr2Bytes(chain);
+
+                startTime = System.nanoTime();
+                byte[][] skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
+                endTime =System.nanoTime();
+                duration = (endTime - startTime) / 1_000_0000.0;
+
+                privateKeySM2=skandchain[0];
+                System.out.println("newsk= "+Util.byte2HexStr(privateKeySM2));
+                chain=Util.byte2HexStr(skandchain[1]);
+                System.out.println("newchain="+chain);
+                publicKeySM2=Update.SM2_Getpkfromsk(privateKeySM2);
+//                address=Util.byte2HexStr(Update.getAddress(publicKeySM2));
+                System.out.println("newPk: "+Util.byte2HexStr(publicKeySM2));
+                keyIndex =keyIndex+1;
+                writeToInternalStorage("-------SM2_PrivateKeyDerive------");
+                writeToInternalStorage("keyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                writeToInternalStorage("耗时="+duration+"ms");
+                writeToInternalStorage("---------------END---------------");
+
+                //函数时间测试
+                   /* for(int i=0;i<10;i++){
+                        long startTime = System.nanoTime();
+                        skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
+                        long endTime =  System.nanoTime();
+                        double duration = (endTime - startTime) / 1_000_000.0;
+
+                        System.out.println("SM2_PrivateKeyDerive time:"+duration+"ms");
+                    }*/
+
+
                 break;
             case R.id.InitialUser://发送初始公钥
                 postOne(urlinitialPK);
@@ -526,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Msgres=json.getString("msg");
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
 
-                      //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
+                        //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
@@ -630,15 +671,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BufferedReader br = new BufferedReader(isr);
                 String message1=br.readLine();
                 while(message1!=null) {
-                  //  Log.i("测试4",message1);
+                    //  Log.i("测试4",message1);
                     try {
                         JSONObject json = new  JSONObject(message1);
                         String base64PublicKey = json.getString("base64PublicKey"); // 获取 Base64 编码的字符串
                         String base64Signature = json.getString("base64Signature"); // 获取 Base64 编码的字符串
                         if(json.getLong("id") != mID){
-                                datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
+                            datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
                         }
-                      //  titletext = json.getString("peoplen");
+                        //  titletext = json.getString("peoplen");
                         TxIDres=json.getString("TxID");
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
@@ -647,7 +688,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
 
                         showres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
-                      //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
+                        //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
@@ -673,7 +714,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return ;
         }
         long Ltimes = System.currentTimeMillis();
+
+        startTime = System.nanoTime();
         sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+        endTime =System.nanoTime();
+        double duration = (endTime - startTime) / 1_000_0000.0;
+
+        writeToInternalStorage("------------SM2_Sign-------------");
+        writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+        writeToInternalStorage("耗时="+duration+"ms");
+        writeToInternalStorage("---------------END---------------");
         //函数时间测试
         /*for(int i=0;i<10;i++){
             long startTime = System.nanoTime();
@@ -683,193 +733,180 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             System.out.println("sign time:"+duration+"ms");
         }*/
-       //=SM2Util.verifySign(publicKeySM2, (message+Ltimes+TxID).getBytes(), sign);
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
-       // Log.d("客户端发消息","verifySign="+verifySign);
-       // signature=sign.toString();
+        // Log.d("客户端发消息","verifySign="+verifySign);
+        // signature=sign.toString();
         MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1");//消息 时间戳 id
         String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
         String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
         userSendMsg = "{\"isimg\":\"1\",\"msg\":\""+sendmsgtext.getText().toString()+"\",\"times\":\""+Ltimes+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"id\":\""+mID+"\"}";
         datas.add(m);
-       messageAdapte.notifyDataSetChanged();//通知数据源发生变化
+        messageAdapte.notifyDataSetChanged();//通知数据源发生变化
         sendmsgtext.setText("");
 
     }
 
-//传1个参数
-private void postOne(String url) {
-    RequestQueue queue = Volley.newRequestQueue(this);
-    StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                   // res=response;
-                    Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
-                    Log.d("测试PostOne", "url = " + url);
-                    Log.d("测试PostOne", "response =" + response);
-                    switch (url){
-                        case "http://192.168.220.20:8080/getTxID":
-                            TxID=response;
-                            showres.setText("TxID="+response);
-                            writeToInternalStorage("--------------GetTxID------------");
-                            writeToInternalStorage("TxID="+response);
-                            writeToInternalStorage("---------------END---------------");
-                            break;
-                        case "http://192.168.220.20:8080/getPublickey":
-                            //publicKeySM2F=Util.hexStr2Bytes(response);
-                            try {
-                                publicKeySM2Cert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(response));
-                                X509Certificate cert=certRecoverfromtx(response);
-                                System.out.println("cert="+cert.toString());
-                                showres.setText("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2Cert));
-                                writeToInternalStorage("---------GetSM2_Publickey--------");
-                                writeToInternalStorage("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2Cert));
-                                writeToInternalStorage("---------------END---------------");
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
+    //传1个参数
+    private void postOne(String url) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest jsonRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // res=response;
+                        Toast.makeText(MainActivity.this, "请求成功: response = " + res, Toast.LENGTH_SHORT).show();
+                        Log.d("测试PostOne", "url = " + url);
+                        Log.d("测试PostOne", "response =" + response);
+                        switch (url){
+                            case "http://192.168.220.20:8080/getTxID"://返回时间
+                                JSONObject jsonObject = null;
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String runtime = jsonObject.getString("runtime");
 
-                            break;
-                        case "http://192.168.220.20:8080/InitialUser":
-                            showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                            writeToInternalStorage("------------InitialUser----------");
-                            writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                            writeToInternalStorage("---------------END---------------");
-                            System.out.println("SM2_Publickey:"+Util.byte2HexStr(publicKeySM2));
-                            break;
-                        case "http://192.168.220.20:8080/keyDerive":
+                                    showres.setText("TxID="+response);
+                                    writeToInternalStorage("--------------GetTxID------------");
+                                    writeToInternalStorage("TxID="+response);
+                                    writeToInternalStorage("耗时="+runtime+"ms");
+                                    writeToInternalStorage("---------------END---------------");
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                break;
+                            case "http://192.168.220.20:8080/getPublickey"://返回时间
+                                //publicKeySM2F=Util.hexStr2Bytes(response);
+
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String runtime = jsonObject.getString("runtime");
+
+                                    publicKeySM2InCert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(response));
+                                    X509Certificate cert=certRecoverfromtx(response);
+
+                                    showres.setText("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2InCert));
+                                    writeToInternalStorage("---------GetSM2_Publickey--------");
+                                    writeToInternalStorage("SM2_PublicKey="+Util.byte2HexStr(publicKeySM2InCert));
+                                    writeToInternalStorage("耗时="+runtime+"ms");
+                                    writeToInternalStorage("---------------END---------------");
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                break;
+                            case "http://192.168.220.20:8080/InitialUser"://返回时间
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String runtime = jsonObject.getString("runtime");
+
+
+                                    showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                                    writeToInternalStorage("------------InitialUser----------");
+                                    writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                                    writeToInternalStorage("---------------END---------------");
+                                    System.out.println("SM2_Publickey:"+Util.byte2HexStr(publicKeySM2));
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                break;
+                      /*  case "http://192.168.220.20:8080/keyDerive":
                             showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                             writeToInternalStorage("-----------SM2_KeyDerive---------");
                             writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                             writeToInternalStorage("---------------END---------------");
-                            break;
-//                        case "http://192.168.220.20:8080/certpk":
-//
-//                            showres.setText(response);
-//                            try {
-//                                String pkInCert=CertificateGenerator.verifyCert(response);
-//                                System.out.println("pkInCert="+pkInCert);
-//                            } catch (Exception e) {
-//                                throw new RuntimeException(e);
-//                            }
-//                            break;
-//                        case "http://192.168.220.20:8080/updatepktest":
-//
-//                            showres.setText(response);
-//                            System.out.println("收到服务器的公钥为："+response);
-//                            break;
-                        default:
-                            System.out.println("Url错误！！");
+                            break;*/
+                            case "http://192.168.220.20:8080/testJson"://返回时间
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String time = jsonObject.getString("runtime");
+                                    String name = jsonObject.getString("chain");
+                                    // 输出或者使用这些数据
+                                    Log.d("JSON解析", "时间: " + time +  ", 链码: " + name);
+                                    System.out.println("JSON解析:时间: " + time +  ", 链码: " + name);
+                                } catch (JSONException e) {
+                                    Log.e("JSON解析错误", "解析失败: " + e.getMessage());
+                                }
+
+                                System.out.println("res:"+res);
+                                break;
+                            default:
+                                System.out.println("Url错误！！");
+
+                        }
+                        CertString=response;
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error.networkResponse != null) {
+                            Log.e("TAG", "Response code: " + error.networkResponse.statusCode);
+                            Log.e("TAG", "Response data: " + new String(error.networkResponse.data));
+                        } else {
+                            Log.e("TAG", "Network response is null");
+                        }
+                        String errorMessage = error.getMessage();
+                        if (errorMessage == null) {
+                            Log.e("TAG", "Error message is null");
+                        } else {
+                            Log.e("TAG", "Error message: " + errorMessage);
+                        }
 
                     }
-                    CertString=response;
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    if (error.networkResponse != null) {
-                        Log.e("TAG", "Response code: " + error.networkResponse.statusCode);
-                        Log.e("TAG", "Response data: " + new String(error.networkResponse.data));
-                    } else {
-                        Log.e("TAG", "Network response is null");
-                    }
-                    String errorMessage = error.getMessage();
-                    if (errorMessage == null) {
-                        Log.e("TAG", "Error message is null");
-                    } else {
-                        Log.e("TAG", "Error message: " + errorMessage);
-                    }
+                }) {
+            @Override
+            public byte[] getBody() {
+                JSONObject jsonObject = new JSONObject();
+                // jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
+                switch (url){
+                    case "http://192.168.220.20:8080/getTxID":
+                        jsonObject=JsonPut.PutJson(jsonObject,"address",address);
+                        break;
+                    case "http://192.168.220.20:8080/getPublickey"://给txID返回证书
+                        // jsonObject=JsonPut.PutJson(jsonObject,"txid",TxID);//测试用的，正常情况下是TxIDres
+                        jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
+                        break;
+                    case "http://192.168.220.20:8080/InitialUser":
 
-                }
-            }) {
-        @Override
-        public byte[] getBody() {
-            JSONObject jsonObject = new JSONObject();
-           // jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
-            switch (url){
-                case "http://192.168.220.20:8080/getTxID":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address);
-                    break;
-                case "http://192.168.220.20:8080/getPublickey"://给txID返回证书
-                   // jsonObject=JsonPut.PutJson(jsonObject,"txid",TxID);//测试用的，正常情况下是TxIDres
-                    jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
-                    break;
-                case "http://192.168.220.20:8080/InitialUser":
+                        jsonObject=JsonPut.PutJson(jsonObject,"address",address);
+                        jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
+                        jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
+                        jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
+                        break;
+             /*   case "http://192.168.220.20:8080/keyDerive":
                     jsonObject=JsonPut.PutJson(jsonObject,"address",address);
                     jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
-                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
-                    jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
-                    break;
-                case "http://192.168.220.20:8080/keyDerive":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address);
-                    jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
-//                    new Update(publicKeySM2,privateKeySM2,chain);
-//                    Update.updateAll(keyIndex);
-//                    publicKeySM2=Update.publicKeySM2;
-//                    privateKeySM2=Update.privateKeySM2;
-//                    chain=Update.chainS;
-//                    keyIndex =keyIndex+1;
                     System.out.println("---------------------------SM2_PrivateKeyDerive------------------------------------");
-                    new Update(publicKeySM2,privateKeySM2,chain);
-                    byte[] chainbyte=Util.hexStr2Bytes(chain);
-                    byte[][] skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
-                    //函数时间测试
-                   /* for(int i=0;i<10;i++){
-                        long startTime = System.nanoTime();
-                        skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
-                        long endTime =  System.nanoTime();
-                        double duration = (endTime - startTime) / 1_000_000.0;
 
-                        System.out.println("SM2_PrivateKeyDerive time:"+duration+"ms");
-                    }*/
-
-                    privateKeySM2=skandchain[0];
-                    System.out.println("newsk= "+Util.byte2HexStr(privateKeySM2));
-                    chain=Util.byte2HexStr(skandchain[1]);
-                    System.out.println("newchain="+chain);
-                    //更新公钥测试
-//                    byte[][] pkandchian=Update.SM2_PublicKeyDerive(publicKeySM2,keyIndex,chainbyte);
-                    publicKeySM2=Update.SM2_Getpkfromsk(privateKeySM2);
-                    System.out.println("newPk: "+Util.byte2HexStr(publicKeySM2));
-                    keyIndex =keyIndex+1;
-                    System.out.println("---------------------------------END---------------------------------------------");
-                    break;
-                /*case "http://192.168.220.20:8080/certpk":
-                    jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
-                    break;
-                case "http://192.168.220.20:8080/updatepktest":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address);
-                    jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",0);
-                    jsonObject=JsonPut.PutJson(jsonObject,"key","56D70FF6E674089C2641176D805FAC31977272BC83598B348DD25FA251965CCE570EB42A852BD60306E853E1BC9F249EE0362888BEC5C9D4762096AFB34829DE");
-                    jsonObject=JsonPut.PutJson(jsonObject,"chain","560AF94CC1C8BB9AE6986502136B425D");
                     break;*/
-                default:
-                    System.out.println("Url错误！！");
-                    return new byte[0]; // 返回空字节数组
+                    case "http://192.168.220.20:8080/testJson":
+                        jsonObject=JsonPut.PutJson(jsonObject,"address","");
+                        break;
+                    default:
+                        System.out.println("Url错误！！");
+                        return new byte[0]; // 返回空字节数组
+                }
+                // 返回 JSON 格式的请求体
+                //  jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
+                System.out.println(jsonObject.toString());
+                return jsonObject.toString().getBytes();
+
             }
-            // 返回 JSON 格式的请求体
-          //  jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
-            System.out.println(jsonObject.toString());
-            return jsonObject.toString().getBytes();
-
-        }
-        @Override
-        public String getBodyContentType() {
-            return "application/json; charset=utf-8";
-        }
-    };
-    // Set a custom retry policy
-    int socketTimeout = 10000; // 10 seconds
-    RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-    jsonRequest.setRetryPolicy(policy);
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+        };
+        int socketTimeout = 10000; // 10 seconds
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        jsonRequest.setRetryPolicy(policy);
 
 
-    queue.add(jsonRequest);
-}
+        queue.add(jsonRequest);
+    }
 
-//消息适应
+    //消息适应
     class MessageAdapte extends BaseAdapter {
 
         @Override
@@ -910,9 +947,7 @@ private void postOne(String url) {
                 holder = (MessageHolder) view.getTag();
             }
             MessageInfor mi = getItem(i);
-          /*  boolean isok=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
-            Log.d("sss","isok="+isok);*/
-            //verifySign=SM2Util.verifySign(mi.getPublicKey().getBytes(), (mi.getMsg()+mi.getTime().toString()+mi.getTxID()).getBytes(), mi.getSignature().getBytes());
+
             verifySign=SM2Util.verifySign(mi.getPublicKey(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature());
             Log.d("测试6","verifySign="+verifySign);
             Log.d("测试6","SM2_Publickey为："+ Util.byte2HexStr(mi.getPublicKey()));
@@ -956,16 +991,6 @@ private void postOne(String url) {
                     holder.rightsign.setVisibility(View.GONE);
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-                   /* if(verifySign){
-                        holder.leftsign.setText("签名通过"+",标识："+mi.getTxID());
-                        holder.leftsign.setTextColor(Color.GREEN);
-                    }else {
-                        holder.leftsign.setText("签名不通过"+",标识："+mi.getTxID());
-                        holder.leftsign.setTextColor(Color.RED);
-                    }*/
-                    //  holder.leftsign.setText("签名："+Arrays.toString(mi.getSignature())+",公钥："+Arrays.toString(mi.getPublicKey())+",标识："+mi.getTxID()+"签名通通通过了");
-
-                    // holder.leftsign.setText("签名："+mi.getSignature()+",公钥："+mi.getPublicKey()+",标识："+mi.getTxID());
                 }
             }
             return view;
@@ -975,17 +1000,17 @@ private void postOne(String url) {
     //获取公钥文件路径
     public String getpathPk() throws IOException {
 
-            InputStream inputStream = getResources().openRawResource(R.raw.x);
-            File outFile = new File(getFilesDir(), "pub"); // 确保使用正确的文件扩展名
-            FileOutputStream outputStream = new FileOutputStream(outFile);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-            outputStream.close();
-            inputStream.close();
-            String filePath = outFile.getAbsolutePath(); // 现在你可以获取文件路径
+        InputStream inputStream = getResources().openRawResource(R.raw.x);
+        File outFile = new File(getFilesDir(), "pub"); // 确保使用正确的文件扩展名
+        FileOutputStream outputStream = new FileOutputStream(outFile);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputStream.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, length);
+        }
+        outputStream.close();
+        inputStream.close();
+        String filePath = outFile.getAbsolutePath(); // 现在你可以获取文件路径
         return filePath;
     }
 
@@ -1018,7 +1043,7 @@ private void postOne(String url) {
         }
     }
 
-//清空logg文件
+    //清空logg文件
     private void clearFileOnStartup() {
         try (FileOutputStream fos = openFileOutput("logg.txt", MODE_PRIVATE)) {
             // 写入空字符串以清空文件内容

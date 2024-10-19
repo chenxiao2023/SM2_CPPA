@@ -161,7 +161,18 @@ public class Update {
         return hash;
     }
 
+    //哈希公钥转为地址
+    public static  byte[] getAddress(byte[] publicKeySM2) {
 
+        // 创建哈希实例
+        SM3Digest digest = new SM3Digest();
+        // 更新哈希
+        digest.update(publicKeySM2, 0, publicKeySM2.length);// 32 字节（256 位）
+        byte[] hash = new byte[digest.getDigestSize()];
+        digest.doFinal(hash, 0);
+        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));
+        return hash;
+    }
     // 将字节数组转换为椭圆曲线公钥
     public static ECPoint PktoECpoint(byte[] publicKeySM2) {
         // 打印公钥字节数组
