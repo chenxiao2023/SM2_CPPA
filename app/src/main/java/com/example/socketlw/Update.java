@@ -191,7 +191,7 @@ public class Update {
     // 正确的推导新的私钥
     public static byte[] deriveSk(BigInteger d, BigInteger d2, BigInteger curveOrder) {
         //G乘以skH
-        BigInteger skH= d.multiply(d2).mod(curveOrder);//模模数
+        BigInteger skH= d.multiply(d2).mod(curveOrder);//模模数..
         byte[] skHB = skH.toByteArray();
         if (skHB.length == 33) {
             skHB = ByteUtils.subArray(skHB, 1, skHB.length);
