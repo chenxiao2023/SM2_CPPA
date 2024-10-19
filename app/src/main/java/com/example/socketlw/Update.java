@@ -170,7 +170,7 @@ public class Update {
         digest.update(publicKeySM2, 0, publicKeySM2.length);// 32 字节（256 位）
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
-        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));
+        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));pppppp
         return hash;
     }
     // 将字节数组转换为椭圆曲线公钥
