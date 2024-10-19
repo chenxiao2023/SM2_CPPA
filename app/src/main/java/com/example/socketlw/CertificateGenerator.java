@@ -74,7 +74,6 @@ public class CertificateGenerator {
         System.out.println("公钥为："+Hex.toHexString(publicKeyCA.getEncoded()));
         pemParserpk.close();
 
-
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         // 证书信息
@@ -143,18 +142,6 @@ public class CertificateGenerator {
         return publicKeyCA;
     }
 
-
-
-    //返回的是证书内的公钥
-    public static String PkRecover(String encodeCert)throws Exception{
-        byte[] Cert= Util.hexStr2Bytes(encodeCert);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate certificateRecover = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(Cert));
-        PublicKey pk=certificateRecover.getPublicKey();
-        String publickey=PKtoStr(pk);
-        return publickey;
-    }
-
     //把字符串转为证书
     public static X509Certificate certRecoverfromtx(String encodeCert)throws Exception{
         byte[] Cert= Hex.decode(encodeCert.substring(2));
@@ -172,21 +159,11 @@ public class CertificateGenerator {
 
     }
 
-    public  X509Certificate certRecover2(String pkCert)throws Exception{
-        byte[] encodeCert= Util.hexStr2Bytes(pkCert);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate certificateRecover = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(encodeCert));
-        return certificateRecover;
-    }
 
 
     // 提取证书里的公钥，并将其格式化为十六进制的字符串形式
     public static String PKtoStr(PublicKey publicKey) {
-        // getEncoded()：PublicKey的字节表示
         byte[] encodedKey = publicKey.getEncoded();
-        // 由于unparsed keybits通常是公钥的实际数据部分，解析X.509结构
-        // 假设我们跳过X.509的头部，直接获取实际的公钥数据部分
-        // 例如对于SM2，前面可能是某些算法标识和序列化信息
         int headerLength = 19;
         byte[] keyBits = new byte[encodedKey.length - headerLength];
         System.arraycopy(encodedKey, headerLength, keyBits, 0, keyBits.length);
@@ -208,57 +185,12 @@ public class CertificateGenerator {
         byte[] keyBits = new byte[PKK.length - headerLength];
        System.arraycopy(PKK, headerLength, keyBits, 0, keyBits.length);
         System.out.println("截取后的公钥："+Util.byte2HexStr(keyBits));
-//        System.out.println("证书内部的公钥为："+(Arrays.toString(cert.getPublicKey().getEncoded())));
-//        System.out.println("证书内部的公钥为："+Util.byte2HexStr(cert.getPublicKey().getEncoded()));
-//        // 更新 Signature 对象以包含原始数据
-//        System.out.println("cert.getTBSCertificate()="+Util.byte2HexStr(cert.getTBSCertificate()));
-//        // 创建 Signature 实例
-//        Signature signature = Signature.getInstance("1.2.156.10197.1.501"); // 使用证书的签名算法
-//        PublicKey PkCA=MygetPublicKey();
-//        signature.initVerify(PkCA);
-//        signature.update(cert.getTBSCertificate());
-//        boolean isValid = signature.verify(signedData);
 
-//        System.out.println("sigalgname: "+cert.getSigAlgName());
-//        System.out.println("signedData="+Util.byte2HexStr(signedData));
-//        System.out.println("验证通过"+isValid);
         return Util.byte2HexStr(keyBits);
 
-        //String pkinCert=PkRecover(encodecert);
-        //System.out.println("证书内的公钥为："+pkinCert);;
-       // PublicKey PkCA=cert.getPublicKey();
-       // System.out.println("公钥CA="+PkCA);
-//       // cert.verify(PkCA,"BC");
-//        System.out.println("ok");
-//
-//
-//        // 创建 Signature 实例
-//        Signature signature = Signature.getInstance(cert.getSigAlgName()); // 使用证书的签名算法
-//        System.out.println("签名算法为："+cert.getSigAlgName());
-//       // signature.initVerify(PkCA);
-//        System.out.println("cert.getTBSCertificate():"+Util.byte2HexStr(cert.getTBSCertificate()));
-//        byte[] signedData=cert.getSignature();
-//        // 更新 Signature 对象以包含原始数据
-//        signature.update(cert.getTBSCertificate());
-//
-//        // 验证签名
-//        boolean isValid = signature.verify(signedData);
-//        System.out.println("signedData="+Util.byte2HexStr(signedData));
-//        System.out.println("验证通过"+isValid);
-//
-//        certRecover(encodecert);
-
     }
 
 
-    public static PublicKey MygetPublicKey()throws Exception{
-        // 现在你可以获取文件路径
-        String filePath="/data/user/0/com.example.socketlw/files/pub";
-        // 在此处使用filePath
-        PublicKey pk=readPublicKey(filePath);
-        return pk;
-
-    }
 
 
 }
