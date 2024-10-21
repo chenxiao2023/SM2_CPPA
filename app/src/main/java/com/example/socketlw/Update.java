@@ -162,15 +162,12 @@ public class Update {
     }
 
     //哈希公钥转为地址
-    public static  byte[] getAddress(byte[] publicKeySM2) {
-
-        // 创建哈希实例
+    public static byte[] Sm3Hash(byte[] SM2_PublicKey){
         SM3Digest digest = new SM3Digest();
-        // 更新哈希
-        digest.update(publicKeySM2, 0, publicKeySM2.length);// 32 字节（256 位）
+        digest.update(SM2_PublicKey, 0, SM2_PublicKey.length);// 32 字节（256 位）
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
-        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));pppppp
+        // System.out.println("Hash (Hex): " + Util.byte2HexStr(hash));
         return hash;
     }
     // 将字节数组转换为椭圆曲线公钥
