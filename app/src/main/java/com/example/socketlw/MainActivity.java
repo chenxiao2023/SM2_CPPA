@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] publicKeySM2InCert= new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
-    private String TxID="1";
+    private String TxID="0x5c61e2b358308c39f4c7ccb258f9421ed1.8ae2ee89721d4b7763e5b51b9e877e";
     //对方消息中的的TxID
     private String TxIDres="";
     private String Timeres="";
@@ -163,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String pkHash = "";
 
-    private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//
-    //private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
+   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";
+    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
     private String chain="560AF94CC1C8BB9AE6986502136B425D";
     // 生成证书
     private X509Certificate certificate;
@@ -193,36 +195,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 super.handleMessage(msg);
             }
         };
-        //SM2的初始化
-        startTime = System.nanoTime();
-        byte[][] key = SM2_GenerateKeyPair();
-        endTime =System.nanoTime();
-        double duration = (endTime - startTime) / 1_000_0000.0;
-        writeToInternalStorage("----------SM2_GenerateKeyPair---------");
-        writeToInternalStorage("SM2_publickey="+key[0]);
-        writeToInternalStorage("SM2_privatekey="+key[1]);
-        writeToInternalStorage("耗时="+duration+"ms");
-        writeToInternalStorage("\n");
-
-
 
         //清空文件内容
         clearFileOnStartup();
-        //函数时间测试
-      /*  for(int i=0;i<10;i++){
-            long startTime = System.nanoTime();
-             key = SM2_GenerateKeyPair();
-            long endTime =System.nanoTime();
-            double duration = (endTime - startTime) / 1_000_0000.0;
-            System.out.println("SM2_GenerateKeyPair() time:"+(duration+"ms"));
-        }*/
 
-
-        publicKeySM2 = key[0];
-        pkHash=Util.byte2HexStr(Sm3Hash(publicKeySM2)).toLowerCase();
-        privateKeySM2 = key[1];
-        System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
-        System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
 
       //  postOne(urltestJson);
 
@@ -358,6 +334,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
                     writeToInternalStorage("\n");
 
+                    /*//函数时间测试
+                    for(int i=0;i<12;i++){
+                        long startTime = System.nanoTime();
+                        sign=SM2_Sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+                        long endTime =  System.nanoTime();
+                        duration = (endTime - startTime) / 1_000_000.0;
+
+                        writeToInternalStorage("第"+i+"次签名耗时="+duration +"ms");
+                    }*/
+
+
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
                     message = sendmsgtext.getText().toString();
                     String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
@@ -392,13 +379,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 verifySign=SM2_Verifysign(publicKeySM2InCert, (Msgres+Timeres+TxIDres).getBytes(), Signres);//正式的
                 endTime =System.nanoTime();
                 double duration = (endTime - startTime) / 1_000_0000.0;
-                //函数时间测试
-               /* for(int i=0;i<10;i++){
+                /*//函数时间测试
+                for(int i=0;i<12;i++){
                 long startTime = System.nanoTime();
-                verifySign=SM2_Verifysign(publicKeySM2InCert, (Msgres+Timeres+TxIDres).getBytes(), Signres);
+                verifySign=SM2_Verifysign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
                 long endTime =System.nanoTime();
-                double duration = (endTime - startTime) / 1_000_0000.0;
-                System.out.println("verifySign time:"+(duration+"ms"));
+                duration = (endTime - startTime) / 1_000_0000.0;
+                writeToInternalStorage("第"+i+"次验证签名耗时="+duration +"ms");
+
             }*/
 
 
@@ -444,16 +432,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 writeToInternalStorage("\n");
 
                 showres.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\n私钥派生完成\n派生私钥="+Util.byte2HexStr(privateKeySM2));
-                //函数时间测试
-                   /* for(int i=0;i<10;i++){
+                /*//函数时间测试
+                    for(int i=0;i<12;i++){
                         long startTime = System.nanoTime();
                         skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
                         long endTime =  System.nanoTime();
-                        double duration = (endTime - startTime) / 1_000_000.0;
+                        duration = (endTime - startTime) / 1_000_000.0;
 
-                        System.out.println("SM2_PrivateKeyDerive time:"+duration+"ms");
-                    }*/
-
+                        writeToInternalStorage("第"+i+"次密钥派生耗时="+duration +"ms");
+                    }
+*/
 
                 break;
             case R.id.InitialUser://发送初始公钥
@@ -736,14 +724,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         writeToInternalStorage("\n");
 
         showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nTxID="+TxID);
-        //函数时间测试
-        /*for(int i=0;i<10;i++){
+        /*//函数时间测试
+        for(int i=0;i<12;i++){
             long startTime = System.nanoTime();
-            sign=SM2Util.sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
+            sign=SM2_Sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
             long endTime =  System.nanoTime();
-            double duration = (endTime - startTime) / 1_000_000.0;
+            duration = (endTime - startTime) / 1_000_000.0;
 
-            System.out.println("sign time:"+duration+"ms");
+            writeToInternalStorage("第"+i+"次签名耗时="+duration +"ms");
         }*/
         Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
         // Log.d("客户端发消息","verifySign="+verifySign);
@@ -817,16 +805,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 break;
                             case "http://192.168.220.20:8080/InitialUser"://返回时间
-                                try {
-
-                                    showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                                    writeToInternalStorage("------------InitialUser----------");
-                                    writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                                    writeToInternalStorage("\n");
-                                    System.out.println("SM2_Publickey:"+Util.byte2HexStr(publicKeySM2));
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
 
                                 break;
                       /*  case "http://192.168.220.20:8080/keyDerive":
@@ -888,6 +866,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
                         break;
                     case "http://192.168.220.20:8080/InitialUser":
+                        try {
+//SM2的初始化
+                            startTime = System.nanoTime();
+                            byte[][] key = SM2_GenerateKeyPair();
+                            endTime =System.nanoTime();
+                            double duration = (endTime - startTime) / 1_000_0000.0;
+                            /*//函数时间测试
+                            for(int i=0;i<12;i++){
+                                long startTime = System.nanoTime();
+                                 key = SM2_GenerateKeyPair();
+                                long endTime =System.nanoTime();
+                                duration = (endTime - startTime) / 1_000_0000.0;
+                                writeToInternalStorage("第"+i+"次生成密钥对耗时="+duration +"ms");
+                            }
+                    */
+                            publicKeySM2 = key[0];
+                            pkHash=Util.byte2HexStr(Sm3Hash(publicKeySM2)).toLowerCase();
+                            privateKeySM2 = key[1];
+                            System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
+                            System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
+                            showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                            writeToInternalStorage("------------InitialUser----------");
+                            writeToInternalStorage("SM2_GenerateKeyPair duration:"+duration+"ms");
+                            writeToInternalStorage("SM2_publickey="+Util.byte2HexStr(key[0]));
+                            writeToInternalStorage("SM2_privatekey="+Util.byte2HexStr(key[1]));
+                            writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nchain="+chain);
+                            writeToInternalStorage("\n");
+                            System.out.println("SM2_Publickey:"+Util.byte2HexStr(publicKeySM2));
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
 
                         jsonObject=JsonPut.PutJson(jsonObject,"address",address);
                         jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
@@ -1087,7 +1096,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 dialog.dismiss();
             }
         });
-
+        // 添加"复制"按钮
+        builder.setNegativeButton("复制", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 获取剪贴板服务
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("文件内容", fileContent);
+                clipboard.setPrimaryClip(clip);  // 设置剪贴板内容
+                Toast.makeText(getApplicationContext(), "内容已复制", Toast.LENGTH_SHORT).show();  // 提示用户
+            }
+        });
         // 显示对话框
         AlertDialog dialog = builder.create();
         dialog.show();
