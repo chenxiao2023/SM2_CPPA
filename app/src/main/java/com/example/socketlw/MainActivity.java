@@ -165,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String pkHash = "";
 
-   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";
-    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
+   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";
+   // private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
     private String chain="560AF94CC1C8BB9AE6986502136B425D";
     // 生成证书
     private X509Certificate certificate;
@@ -343,8 +343,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         writeToInternalStorage("第"+i+"次签名耗时="+duration +"ms");
                     }*/
-
-
                     Log.d("发送消息时","签名为："+ Util.byte2HexStr(sign));
                     message = sendmsgtext.getText().toString();
                     String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
@@ -352,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     datas.add(new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1"));
                     sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
-                    showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nTxID="+TxID);
+                    showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
                 }else {//客户端
                     sendMsgText();
 
@@ -392,17 +390,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(verifySign){
                     System.out.println("签名验证成功");
-                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
+                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
                     writeToInternalStorage("----------SM2_VerifySign---------");
-                    writeToInternalStorage("SM2_VerifySign duration:");
+                    writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
                     writeToInternalStorage("\n");
                     //showres.setTextColor(Color.GREEN);
                 }else{
                     System.out.println("签名验证失败");
-                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
+                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
                     writeToInternalStorage("----------SM2_VerifySign---------");
-                    writeToInternalStorage("SM2_VerifySign duration:");
+                    writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
                     writeToInternalStorage("\n");
                     // showres.setTextColor(Color.RED);
@@ -431,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 writeToInternalStorage("keyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                 writeToInternalStorage("\n");
 
-                showres.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\n私钥派生完成\n派生私钥="+Util.byte2HexStr(privateKeySM2));
+                showres.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                 /*//函数时间测试
                     for(int i=0;i<12;i++){
                         long startTime = System.nanoTime();
@@ -723,7 +721,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         writeToInternalStorage("\n");
 
-        showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nTxID="+TxID);
+        showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
         /*//函数时间测试
         for(int i=0;i<12;i++){
             long startTime = System.nanoTime();
@@ -796,7 +794,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     //X509Certificate cert=certRecoverfromtx(publicKey);
 
                                     showres.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
-                                    writeToInternalStorage("---------GetSM2_Publickey--------");
+                                    writeToInternalStorage("---------Get_Publickey--------");
                                     writeToInternalStorage("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
                                     writeToInternalStorage("\n");
                                 } catch (Exception e) {
@@ -886,7 +884,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             privateKeySM2 = key[1];
                             System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
                             System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
-                            showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                            showres.setText("SM2_GenerateKeyPair duration:"+duration+"ms"+"\nSM2_publickey="+Util.byte2HexStr(key[0])+"\nSM2_privatekey="+Util.byte2HexStr(key[1])+"\naddress="+address+"\nkeyIndex="+keyIndex+"\nchain="+chain);
                             writeToInternalStorage("------------InitialUser----------");
                             writeToInternalStorage("SM2_GenerateKeyPair duration:"+duration+"ms");
                             writeToInternalStorage("SM2_publickey="+Util.byte2HexStr(key[0]));
