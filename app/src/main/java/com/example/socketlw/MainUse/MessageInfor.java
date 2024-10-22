@@ -1,4 +1,4 @@
-package com.example.socketlw;
+package com.example.socketlw.MainUse;
 public class MessageInfor {
     private int ID;
     private String msg;

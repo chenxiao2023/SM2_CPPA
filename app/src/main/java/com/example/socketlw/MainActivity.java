@@ -1,15 +1,11 @@
 package com.example.socketlw;
 
-import static com.example.socketlw.CertificateGenerator.certRecover;
-import static com.example.socketlw.CertificateGenerator.certRecoverfromtx;
-import static com.example.socketlw.CertificateGenerator.makeCert;
-import static com.example.socketlw.CertificateGenerator.readPublicKey;
 import static com.example.socketlw.SM2Utils.SM2Util.SM2_GenerateKeyPair;
 import static com.example.socketlw.SM2Utils.SM2Util.SM2_Sign;
 import static com.example.socketlw.SM2Utils.SM2Util.SM2_Verifysign;
-import static com.example.socketlw.Update.SM2_Getpkfromsk;
-import static com.example.socketlw.Update.SM2_PrivateKeyDerive;
-import static com.example.socketlw.Update.Sm3Hash;
+import static com.example.socketlw.SM2Utils.Update.SM2_Getpkfromsk;
+import static com.example.socketlw.SM2Utils.Update.SM2_PrivateKeyDerive;
+import static com.example.socketlw.SM2Utils.Update.Sm3Hash;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -22,10 +18,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,17 +35,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -61,13 +48,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,19 +64,15 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.socketlw.MainUse.JsonPut;
 import com.example.socketlw.MainUse.MessageHolder;
-import com.example.socketlw.SM2Utils.SM2Util;
+import com.example.socketlw.MainUse.MessageInfor;
+import com.example.socketlw.SM2Utils.CertificateGenerator;
+import com.example.socketlw.SM2Utils.Update;
 import com.example.socketlw.SM2Utils.Util;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.security.*;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;
@@ -128,12 +108,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] publicKeySM2 = new byte[0];
     private byte[] privateKeySM2 = new byte[0];
     private int keyIndex=0;
+    private String chain="560AF94CC1C8BB9AE6986502136B425D";
     //从服务器接收的公钥。
-    private byte[] publicKeySM2Res = new byte[0];
     private byte[] publicKeySM2InCert= new byte[0];
     private byte[] sign  = new byte[0];
     private Boolean verifySign  = false;
-    private String TxID="0x5c61e2b358308c39f4c7ccb258f9421ed1.8ae2ee89721d4b7763e5b51b9e877e";
+    private String TxID="";
     //对方消息中的的TxID
     private String TxIDres="";
     private String Timeres="";
@@ -141,35 +121,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private byte[] Signres=new byte[0];
 
 
-    //测试参数
+    //时间测试参数
     private long startTime;
     private long endTime;
-    //http参数
-    private String res="";
-    private String CertString = "";
-    //验证方取证书
-    private String filePath="/data/user/0/com.example.socketlw/files/pub";
 
-
+    //初始化用户
     private  String urlinitialPK = "http://192.168.220.20:8080/InitialUser";
-    private  String urlUpdatePK = "http://192.168.220.20:8080/keyDerive";
-
-    //  private  String urlUpdatePKtest = "http://192.168.220.20:8080/updatepktest";
     //签名方取TxID
     private  String urlTxID =  "http://192.168.220.20:8080/getTxID";
-    //从TxID取公钥
+    //验证方从TxID取公钥
     private  String urlTxID2PublicKey = "http://192.168.220.20:8080/getPublickey";
-    private  String urlPk2cert = "http://192.168.220.20:8080/certpk";
-    private  String urltestJson = "http://192.168.220.20:8080/testJson";
-
 
     private String pkHash = "";
 
-   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";
-   // private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";
-    private String chain="560AF94CC1C8BB9AE6986502136B425D";
-    // 生成证书
-    private X509Certificate certificate;
+   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
+    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
 
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请
@@ -198,10 +164,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //清空文件内容
         clearFileOnStartup();
-
-
-      //  postOne(urltestJson);
-
     }
 
     /**
@@ -211,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         titleview = (TextView) findViewById(R.id.titleview);
         showmsg = (ListView) findViewById(R.id.showmsg);
         showres = (TextView) findViewById(R.id.showres);
-        showres.setMovementMethod(new ScrollingMovementMethod());
+        showres.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
         sendmsgtext = (EditText) findViewById(R.id.sendmsgtext);
         startserver = (Button) findViewById(R.id.startserver);
         continueserver = (Button) findViewById(R.id.continueserver);
@@ -236,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateSk.setOnClickListener(this);
         InitialUser.setOnClickListener(this);
         showFile.setOnClickListener(this);
-        // sendimg.setOnClickListener(this);
 
     }
     //定义判断权限申请的函数，在onCreat中调用就行
@@ -353,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
                 }else {//客户端
                     sendMsgText();
-
                 }
                 break;
             case R.id.mapgettxid://发送Address获取TxID
@@ -368,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 long Ltimes = System.currentTimeMillis();
                 long nowTime = Long.parseLong(Timeres);
                 if((nowTime-Ltimes)/1000>60){
-
                     System.out.println("超时");
                     break;
                 }
@@ -380,14 +339,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /*//函数时间测试
                 for(int i=0;i<12;i++){
                 long startTime = System.nanoTime();
-                verifySign=SM2_Verifysign(publicKeySM2Res, (Msgres+Timeres+TxIDres).getBytes(), Signres);
+                verifySign=SM2_Verifysign(publicKeySM2InCert, (Msgres+Timeres+TxIDres).getBytes(), Signres);
                 long endTime =System.nanoTime();
                 duration = (endTime - startTime) / 1_000_0000.0;
                 writeToInternalStorage("第"+i+"次验证签名耗时="+duration +"ms");
-
             }*/
-
-
                 if(verifySign){
                     System.out.println("签名验证成功");
                     showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
@@ -436,11 +392,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         skandchain=Update.SM2_PrivateKeyDerive(privateKeySM2,keyIndex,chainbyte);
                         long endTime =  System.nanoTime();
                         duration = (endTime - startTime) / 1_000_000.0;
-
                         writeToInternalStorage("第"+i+"次密钥派生耗时="+duration +"ms");
-                    }
-*/
-
+                    }*/
                 break;
             case R.id.InitialUser://发送初始公钥
                 postOne(urlinitialPK);
@@ -449,7 +402,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showFileContentDialog();
                 break;
             default:
-
         }
     }
     /**
@@ -500,7 +452,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                             // 当有客户端连接时，创建一个新的ClientHandler实例来处理该客户端
                             ClientHandler hander = new ClientHandler(socket1);
-
                             // 为每个客户端启动一个新线程来执行ClientHandler
                             Thread t = new Thread(hander);
                             t.start();
@@ -508,12 +459,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }).start();
     }
-
     //该线程类是与指定的客户端进行交互工作
     class ClientHandler implements Runnable{
         //当前线程客户端的Socket
         private Socket socket;
-
         //该客户端的地址
         private String host;
 
@@ -547,7 +496,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 String message = null;
                 while((message = br.readLine())!=null) {
-
                     try {//接收到客户端发送的消息后，使用 JSONObject 解析消息。
                         JSONObject json = new  JSONObject(message);
                         String base64PublicKey = json.getString("base64PublicKey"); // 获取 Base64 编码的字符串
@@ -557,32 +505,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
                         showres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
                         TxIDres=json.getString("TxID");
-                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
-
-                        //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
-
                     //将解析后的消息广播给所有客户端
                     sendMessage(message);
                 }
-
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }finally {
                 //将该客户端的输出流从共享集合中删除，以避免后续广播给已断开的客户端
                 removeOut(pw);
-
                 //有用户退出
                 sendMessage("["+host+"]退出聊天!");
-
                 handler.sendEmptyMessage(2);
-
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -633,7 +573,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 //ServerHandler是自己写的类，实现Runnable接口,有多线程功能
                                 Thread t = new Thread(handler);
                                 t.start();
-
                                 //将数据发送到服务端
                                 OutputStream out = socket.getOutputStream();//获取输出流对象
                                 OutputStreamWriter osw = new OutputStreamWriter(out,"utf-8");//转化成utf-8格式
@@ -647,13 +586,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
                         }
                     }).start();
         }
         return isContinue;
     }
-
     class ServerHandler implements Runnable{
         /**
          * 读取服务端发送过来的消息
@@ -666,7 +603,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BufferedReader br = new BufferedReader(isr);
                 String message1=br.readLine();
                 while(message1!=null) {
-                    //  Log.i("测试4",message1);
                     try {
                         JSONObject json = new  JSONObject(message1);
                         String base64PublicKey = json.getString("base64PublicKey"); // 获取 Base64 编码的字符串
@@ -674,21 +610,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if(json.getLong("id") != mID){
                             datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
                         }
-                        //  titletext = json.getString("peoplen");
                         TxIDres=json.getString("TxID");
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
-                        publicKeySM2Res=Base64.decode(base64PublicKey, Base64.NO_WRAP);
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
                         handler.sendEmptyMessage(1);
-
                         showres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
-                        //  messageAdapte.notifyDataSetChanged();//通知数据源发生变化
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
                     message1=br.readLine();
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -709,18 +640,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return ;
         }
         long Ltimes = System.currentTimeMillis();
-
         startTime = System.nanoTime();
         sign=SM2_Sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
         endTime =System.nanoTime();
         double duration = (endTime - startTime) / 1_000_0000.0;
-
         writeToInternalStorage("------------SM2_Sign-------------");
         writeToInternalStorage("SM2_Sign duration:"+duration+"ms");
         writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
-
         writeToInternalStorage("\n");
-
         showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
         /*//函数时间测试
         for(int i=0;i<12;i++){
@@ -728,12 +655,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sign=SM2_Sign(privateKeySM2,(message+Ltimes+TxID).getBytes() );
             long endTime =  System.nanoTime();
             duration = (endTime - startTime) / 1_000_000.0;
-
             writeToInternalStorage("第"+i+"次签名耗时="+duration +"ms");
         }*/
-        Log.d("客户端发消息","sign="+ Util.byte2HexStr(sign));
-        // Log.d("客户端发消息","verifySign="+verifySign);
-        // signature=sign.toString();
         MessageInfor m = new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1");//消息 时间戳 id
         String base64PublicKey = Base64.encodeToString(publicKeySM2, Base64.NO_WRAP);
         String base64Signature = Base64.encodeToString(sign, Base64.NO_WRAP);
@@ -741,9 +664,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         datas.add(m);
         messageAdapte.notifyDataSetChanged();//通知数据源发生变化
         sendmsgtext.setText("");
-
     }
-
     //传1个json参数
     private void postOne(String url) {
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -751,8 +672,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // res=response;
-
                         Log.d("测试PostOne", "url = " + url);
                         Log.d("测试PostOne", "response =" + response);
                         switch (url){
@@ -774,25 +693,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         writeToInternalStorage("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
                                         writeToInternalStorage("\n");
                                     }
-
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
-
                                 break;
                             case "http://192.168.220.20:8080/getPublickey"://返回时间
-                                //publicKeySM2F=Util.hexStr2Bytes(response);
-
                                 try {
                                     jsonObject = new JSONObject(response);
                                     String runtime = jsonObject.getString("runtime");
                                     String publicKey = jsonObject.getString("publicKey");
                                     String transaction = jsonObject.getString("transaction");
-
-
                                     publicKeySM2InCert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(publicKey));
-                                    //X509Certificate cert=certRecoverfromtx(publicKey);
-
                                     showres.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
                                     writeToInternalStorage("---------Get_Publickey--------");
                                     writeToInternalStorage("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
@@ -800,36 +711,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
-
                                 break;
                             case "http://192.168.220.20:8080/InitialUser"://返回时间
-
-                                break;
-                      /*  case "http://192.168.220.20:8080/keyDerive":
-                            showres.setText("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                            writeToInternalStorage("-----------SM2_KeyDerive---------");
-                            writeToInternalStorage("address="+address+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
-                            writeToInternalStorage("\n");
-                            break;*/
-                            case "http://192.168.220.20:8080/testJson"://返回时间
-                                try {
-                                    jsonObject = new JSONObject(response);
-                                    String time = jsonObject.getString("runtime");
-                                    String name = jsonObject.getString("chain");
-                                    // 输出或者使用这些数据
-                                    Log.d("JSON解析", "时间: " + time +  ", 链码: " + name);
-                                    System.out.println("JSON解析:时间: " + time +  ", 链码: " + name);
-                                } catch (JSONException e) {
-                                    Log.e("JSON解析错误", "解析失败: " + e.getMessage());
-                                }
-
-                                System.out.println("res:"+res);
                                 break;
                             default:
                                 System.out.println("Url错误！！");
-
                         }
-                        CertString=response;
                     }
                 },
                 new Response.ErrorListener() {
@@ -847,7 +734,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             Log.e("TAG", "Error message: " + errorMessage);
                         }
-
                     }
                 }) {
             @Override
@@ -856,16 +742,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
                 switch (url){
                     case "http://192.168.220.20:8080/getTxID":
-                        jsonObject=JsonPut.PutJson(jsonObject,"address",address);
+                        jsonObject= JsonPut.PutJson(jsonObject,"address",address);
                         jsonObject=JsonPut.PutJson(jsonObject,"pkhash",pkHash);
                         break;
                     case "http://192.168.220.20:8080/getPublickey"://给txID返回证书
-                        // jsonObject=JsonPut.PutJson(jsonObject,"txid",TxID);//测试用的，正常情况下是TxIDres
                         jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
                         break;
                     case "http://192.168.220.20:8080/InitialUser":
                         try {
-//SM2的初始化
                             startTime = System.nanoTime();
                             byte[][] key = SM2_GenerateKeyPair();
                             endTime =System.nanoTime();
@@ -877,8 +761,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 long endTime =System.nanoTime();
                                 duration = (endTime - startTime) / 1_000_0000.0;
                                 writeToInternalStorage("第"+i+"次生成密钥对耗时="+duration +"ms");
-                            }
-                    */
+                            } */
                             publicKeySM2 = key[0];
                             pkHash=Util.byte2HexStr(Sm3Hash(publicKeySM2)).toLowerCase();
                             privateKeySM2 = key[1];
@@ -895,30 +778,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-
                         jsonObject=JsonPut.PutJson(jsonObject,"address",address);
                         jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
                         jsonObject=JsonPut.PutJson(jsonObject,"key",Util.byte2HexStr(publicKeySM2));
                         jsonObject=JsonPut.PutJson(jsonObject,"chain",chain);
                         break;
-             /*   case "http://192.168.220.20:8080/keyDerive":
-                    jsonObject=JsonPut.PutJson(jsonObject,"address",address);
-                    jsonObject=JsonPut.PutJson(jsonObject,"keyIndex",keyIndex);
-                    System.out.println("---------------------------SM2_PrivateKeyDerive------------------------------------");
-
-                    break;*/
-                    case "http://192.168.220.20:8080/testJson":
-                        jsonObject=JsonPut.PutJson(jsonObject,"address","");
-                        break;
                     default:
                         System.out.println("Url错误！！");
                         return new byte[0]; // 返回空字节数组
                 }
-                // 返回 JSON 格式的请求体
-                //  jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
                 System.out.println(jsonObject.toString());
                 return jsonObject.toString().getBytes();
-
             }
             @Override
             public String getBodyContentType() {
@@ -968,7 +838,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 holder.leftimgtime = (TextView) view.findViewById(R.id.leftimgtime);
                 holder.rightimg = (ImageView) view.findViewById(R.id.rightimg);
                 holder.leftimg = (ImageView) view.findViewById(R.id.leftimg);
-
                 view.setTag(holder);
             }else {
                 holder = (MessageHolder) view.getTag();
@@ -978,8 +847,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             verifySign= SM2_Verifysign(mi.getPublicKey(), (mi.getMsg()+mi.getTime()+mi.getTxID()).getBytes(), mi.getSignature());
             //显示
             if (mi.getUserID() == mID){//id相等,自己发的
-                if(mi.getType().equals("0")){//图片
-                }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
                     holder.rightimg.setVisibility(View.GONE);
@@ -993,14 +860,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.rightsign.setVisibility(View.VISIBLE);
                     holder.right.setText(mi.getMsg());
                     holder.righttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
-
-
-                }
-
-
             }else {//对面发的
-                if(mi.getType().equals("0")){//图片
-                }else if(mi.getType().equals("1")){//消息
                     holder.leftimg.setVisibility(View.GONE);
                     holder.leftimgtime.setVisibility(View.GONE);
                     holder.rightimg.setVisibility(View.GONE);
@@ -1015,7 +875,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     holder.left.setText(mi.getMsg());
                     holder.lefttime.setText(simpleDateFormat.format(new Date(mi.getTime())));
                 }
-            }
             return view;
         }
     }

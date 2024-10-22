@@ -1,12 +1,8 @@
-package com.example.socketlw;
-
-import com.example.socketlw.SM2Utils.SM2Util;
-import com.example.socketlw.SM2Utils.Util;
+package com.example.socketlw.SM2Utils;
 
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.SM3Digest;
-import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
@@ -17,7 +13,6 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.sql.SQLOutput;
 
 
 public class Update {

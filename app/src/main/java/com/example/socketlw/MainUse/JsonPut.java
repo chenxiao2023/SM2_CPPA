@@ -1,4 +1,4 @@
-package com.example.socketlw;
+package com.example.socketlw.MainUse;
 
 import org.json.JSONException;
 import org.json.JSONObject;

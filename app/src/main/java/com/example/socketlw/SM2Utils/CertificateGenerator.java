@@ -1,6 +1,4 @@
-package com.example.socketlw;
-
-import com.example.socketlw.SM2Utils.Util;
+package com.example.socketlw.SM2Utils;
 
 import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -9,10 +7,8 @@ import org.bouncycastle.asn1.gm.GMObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -20,10 +16,8 @@ import org.bouncycastle.util.encoders.Hex;
 
 
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 //import org.bouncycastle.util.encoders.Hex;
 
@@ -31,11 +25,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.ByteArrayInputStream;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 
-import java.io.InputStream;
 import java.math.BigInteger;
 
 import java.security.*;
@@ -43,16 +34,7 @@ import java.security.*;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
-
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.junit.Test;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-
 
 
 public class CertificateGenerator {

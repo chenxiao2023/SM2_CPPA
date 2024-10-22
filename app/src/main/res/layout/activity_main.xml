@@ -65,9 +65,6 @@
             android:ems="12"
             android:inputType="textPersonName" />
 
-
-
-
         <Button
             android:id="@+id/sendmsgbt"
             android:layout_width="wrap_content"
