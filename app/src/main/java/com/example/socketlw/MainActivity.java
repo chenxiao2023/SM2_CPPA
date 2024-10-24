@@ -134,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String pkHash = "";
 
-   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
-    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
+   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
+    //private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
 
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请

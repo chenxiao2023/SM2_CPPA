@@ -10,7 +10,7 @@
         android:id="@+id/titleview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="NULL"
+        android:text=""
         android:gravity="center"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -41,7 +41,7 @@
     <TextView
         android:id="@+id/showres"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="180dp"
         android:scrollbars="vertical"
         android:text="展示框"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
