@@ -1,4 +1,4 @@
-package com.example.socketlw.SM2Utils;
+package com.example.SM2_CPPA.SM2Utils;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CryptoException;
@@ -11,7 +11,6 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.PlainDSAEncoding;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.pqc.legacy.math.linearalgebra.ByteUtils;
-
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -33,7 +32,7 @@ public class SM2Util {
         return SM2.Instance().getPublicKeyFromPrivateKey(privateKey);
     }
 
-    public static byte[][] SM2_GenerateKeyPair() {
+    public static byte[][] generateKeyPair() {
         AsymmetricCipherKeyPair key = SM2.Instance().generateKeyPair();
         ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
         ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
@@ -97,7 +96,7 @@ public class SM2Util {
         }
     }
 
-    public static byte[] SM2_Sign(byte[] privateKey, byte[] sourceData) {
+    public static byte[] sign(byte[] privateKey, byte[] sourceData) {
         ECPrivateKeyParameters privateKeyParameters = SM2.Instance().getPrivateKeyParameters(privateKey);
         SM2Signer signer = new SM2Signer(new PlainDSAEncoding());
         signer.init(true, privateKeyParameters);
@@ -109,7 +108,7 @@ public class SM2Util {
         }
     }
 
-    public static boolean SM2_Verifysign(byte[] publicKey, byte[] sourceData, byte[] signData) {
+    public static boolean verifySign(byte[] publicKey, byte[] sourceData, byte[] signData) {
         ECPublicKeyParameters publicKeyParameters = SM2.Instance().getPublicKeyParameters(publicKey);
         SM2Signer signer = new SM2Signer(new PlainDSAEncoding());
         signer.init(false, publicKeyParameters);

@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+    <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+        <config>
+          <theme>@style/Theme.SocketLW</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/chart_item.xml">
+        <config>
+          <theme>@style/Theme.SocketLW</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/continue_server.xml">
+        <config>
+          <theme>@style/Theme.SocketLW</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/start_server.xml">
+        <config>
+          <theme>@style/Theme.SocketLW</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml">
+        <config>
+          <theme>@style/Theme.SocketLW</theme>
+        </config>
+      </layout>
+    </layouts>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1d4d49e5-6050-4508-bb48-31448ebe048d" name="Default Changelist" comment="更新了readme，">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/androidTest/java/com/example/socketlw/ExampleInstrumentedTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/example/SM2_CPPA/ExampleInstrumentedTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/MainUse/JsonPut.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/MainUse/JsonPut.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/MainUse/MessageHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/MainUse/MessageHolder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/MainUse/MessageInfor.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/MainUse/MessageInfor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/CertificateGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/CertificateGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/SM2.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/SM2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/SM2Signer.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/SM2Signer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/SM2Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/SM2Util.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/Update.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/Update.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/socketlw/SM2Utils/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/Util.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-night/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-night/themes.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/ExampleUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/ExampleUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/CertificateGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/CertificateGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/SM2.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/SM2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/SM2Signer.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/SM2_CPPA/SM2Utils/SM2Signer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/SM2Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/SM2Util.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/TextUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/TextUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/socketlw/SM2Utils/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/SM2_CPPA/SM2Utils/Util.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/publish-mavencentral.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/publish-mavencentral.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\22861\.android\avd\Pixel_4_API_29.avd)]" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/app">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="SM2_CPPA" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="layoutResourceFile" />
+        <option value="resourceFile" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="master" />
+              </list>
+            </value>
+          </entry>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="new" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;chenxiao2023&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/chenxiao2023/SocketLW.git&quot;,
+    &quot;accountId&quot;: &quot;1d4085d1-0d7e-4c80-ae85-e3dd7be9a8ee&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="1oV4T8LiCvvyzX7IATlNXHAyNwA" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Android App.app.executor": "Run",
+    "Android Instrumented Tests.ExampleInstrumentedTest.executor": "Run",
+    "Gradle.ExampleUnitTest.addition_isCorrect.executor": "Run",
+    "Gradle.ExampleUnitTest.executor": "Run",
+    "Gradle.SocketLW:app [:app:CertificateGenerator.main()].executor": "Run",
+    "JUnit.ExampleUnitTest.addition_isCorrect.executor": "Run",
+    "JUnit.ExampleUnitTest22.addition_isCorrect.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "ScreenshotViewer.SavePath": "C:/Users/22861/Desktop",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_directory_selection": "C:/Users/22861/Desktop/game/SocketLW/app/src/main/res/drawable",
+    "last_opened_file_path": "C:/Users/22861/Desktop/game/BCPAA/SM2_CPPA",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
+  },
+  "keyToStringList": {
+    "kotlin-gradle-user-dirs": [
+      "C:\\Users\\22861\\.gradle"
+    ]
+  }
+}]]></component>
+  <component name="PsdUISettings">
+    <option name="MODULE_TAB" value="Properties" />
+    <option name="LAST_EDITED_SIGNING_CONFIG" value="debug" />
+    <option name="LAST_EDITED_BUILD_TYPE" value="release" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\22861\Desktop\game\BCPAA\SocketLW\app\src\main\java\com\example\socketlw" />
+      <recent name="C:\Users\22861\Desktop\game\BCPAA\SocketLW\app\src\main\java\com\example\socketlw\SM2Utils" />
+      <recent name="C:\Users\22861\Desktop\game\BCPAA\SocketLW\app\src\test\java\com\example\socketlw" />
+      <recent name="C:\Users\22861\Desktop\game\BCPAA\SocketLW\app\src\main\res\raw" />
+      <recent name="C:\Users\22861\Desktop\game\BCPAA\SocketLW\app\src\main\res" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\22861\Desktop\game\SocketLW\app\src\main\res\drawable" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.example.socketlw" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.example.socketlw.SM2Utils.TTT" />
+      <recent name="com.example.socketlw.SM2Utils" />
+      <recent name="com.example.socketlw" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Android App.app">
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="SM2_CPPA.app.main" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Hybrid>
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ExampleInstrumentedTest" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" temporary="true" nameIsGenerated="true">
+      <module name="SocketLW.app.androidTest" />
+      <option name="TESTING_TYPE" value="2" />
+      <option name="METHOD_NAME" value="" />
+      <option name="CLASS_NAME" value="com.example.SM2_CPPA.ExampleInstrumentedTest" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_NAME_REGEX" value="" />
+      <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
+      <option name="EXTRA_OPTIONS" value="" />
+      <option name="RETENTION_ENABLED" value="No" />
+      <option name="RETENTION_MAX_SNAPSHOTS" value="2" />
+      <option name="RETENTION_COMPRESS_SNAPSHOTS" value="false" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Hybrid>
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CertificateGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.example.SM2_CPPA.SM2Utils.CertificateGenerator" />
+      <module name="SocketLW.app.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.SM2_CPPA.SM2Utils.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ExampleUnitTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":app:testDebugUnitTest" />
+            <option value="--tests" />
+            <option value="&quot;com.example.socketlw.ExampleUnitTest&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="ExampleUnitTest.addition_isCorrect" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":app:testDebugUnitTest" />
+            <option value="--tests" />
+            <option value="&quot;com.example.socketlw.ExampleUnitTest.addition_isCorrect&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="ExampleUnitTest22.addition_isCorrect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="SocketLW.app.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.socketlw.SM2Utils.TTT.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.socketlw.SM2Utils.TTT" />
+      <option name="MAIN_CLASS_NAME" value="com.example.socketlw.SM2Utils.TTT.ExampleUnitTest22" />
+      <option name="METHOD_NAME" value="addition_isCorrect" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.ExampleUnitTest.addition_isCorrect" />
+        <item itemvalue="Gradle.ExampleUnitTest" />
+        <item itemvalue="JUnit.ExampleUnitTest22.addition_isCorrect" />
+        <item itemvalue="Android Instrumented Tests.ExampleInstrumentedTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1d4d49e5-6050-4508-bb48-31448ebe048d" name="Default Changelist" comment="" />
+      <created>1613358428550</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1613358428550</updated>
+    </task>
+    <task id="LOCAL-00001" summary="加了暂时签名，但是链接不上服务器了">
+      <option name="closed" value="true" />
+      <created>1726912508539</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1726912508539</updated>
+    </task>
+    <task id="LOCAL-00002" summary="加了暂时签名，也连上了服务器（记得IP地址是否正确">
+      <option name="closed" value="true" />
+      <created>1726915677819</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1726915677819</updated>
+    </task>
+    <task id="LOCAL-00003" summary="加了一些SM2的配置，把gradle的版本降低了">
+      <option name="closed" value="true" />
+      <created>1726998429809</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1726998429810</updated>
+    </task>
+    <task id="LOCAL-00004" summary="加了一些SM2的配置，把gradle的版本降低了">
+      <option name="closed" value="true" />
+      <created>1726998552373</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1726998552373</updated>
+    </task>
+    <task id="LOCAL-00005" summary="在发送消息的同时，把公钥和签名同时发送过去，对方可以进行签名的验证">
+      <option name="closed" value="true" />
+      <created>1727084922385</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1727084922385</updated>
+    </task>
+    <task id="LOCAL-00006" summary="修改了一下签名验证结果的展示，优化了一下layout界面">
+      <option name="closed" value="true" />
+      <created>1727148333909</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1727148333909</updated>
+    </task>
+    <task id="LOCAL-00007" summary="实现了get请求来获取TxID">
+      <option name="closed" value="true" />
+      <created>1727572996010</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1727572996010</updated>
+    </task>
+    <task id="LOCAL-00008" summary="实现了post请求来获取TxID">
+      <option name="closed" value="true" />
+      <created>1728208039762</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1728208039762</updated>
+    </task>
+    <task id="LOCAL-00009" summary="实现了由TxID获取公钥等方法">
+      <option name="closed" value="true" />
+      <created>1728383225801</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1728383225801</updated>
+    </task>
+    <task id="LOCAL-00010" summary="密钥派生成功">
+      <option name="closed" value="true" />
+      <created>1728448877897</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1728448877898</updated>
+    </task>
+    <task id="LOCAL-00011" summary="密钥派生成功">
+      <option name="closed" value="true" />
+      <created>1728563667896</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1728563667896</updated>
+    </task>
+    <task id="LOCAL-00012" summary="从pub文件读取公钥成功！">
+      <option name="closed" value="true" />
+      <created>1728622138856</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1728622138856</updated>
+    </task>
+    <task id="LOCAL-00013" summary="整理了一下项目结构">
+      <option name="closed" value="true" />
+      <created>1728710133405</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1728710133405</updated>
+    </task>
+    <task id="LOCAL-00014" summary="改了接口名">
+      <option name="closed" value="true" />
+      <created>1728889387827</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1728889387827</updated>
+    </task>
+    <task id="LOCAL-00015" summary="基本功能实现，只差改为双端的">
+      <option name="closed" value="true" />
+      <created>1728906812282</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1728906812282</updated>
+    </task>
+    <task id="LOCAL-00016" summary="基本功能实现（还没测两部手机">
+      <option name="closed" value="true" />
+      <created>1728908067758</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1728908067758</updated>
+    </task>
+    <task id="LOCAL-00017" summary="两部手机测试成功（记得该电脑上的Address">
+      <option name="closed" value="true" />
+      <created>1728911755451</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1728911755451</updated>
+    </task>
+    <task id="LOCAL-00018" summary="两部手机测试成功（记得该电脑上的Address">
+      <option name="closed" value="true" />
+      <created>1728956533268</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1728956533268</updated>
+    </task>
+    <task id="LOCAL-00019" summary="两部手机测试成功（记得该电脑上的Address">
+      <option name="closed" value="true" />
+      <created>1729088067254</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1729088067254</updated>
+    </task>
+    <task id="LOCAL-00020" summary="改了一点按钮名字，然后加了签名时间检测">
+      <option name="closed" value="true" />
+      <created>1729216964190</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1729216964190</updated>
+    </task>
+    <task id="LOCAL-00021" summary="改了一点按钮名字，然后加了签名时间检测">
+      <option name="closed" value="true" />
+      <created>1729217355320</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1729217355320</updated>
+    </task>
+    <task id="LOCAL-00022" summary="增加了消耗时间的输出">
+      <option name="closed" value="true" />
+      <created>1729351591170</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1729351591170</updated>
+    </task>
+    <task id="LOCAL-00023" summary="增加了消耗时间的输出">
+      <option name="closed" value="true" />
+      <created>1729353253104</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1729353253104</updated>
+    </task>
+    <task id="LOCAL-00024" summary="将耗时放在最上面输出，加了撤销公钥">
+      <option name="closed" value="true" />
+      <created>1729494790720</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1729494790720</updated>
+    </task>
+    <task id="LOCAL-00025" summary="将generate函数放在了initial按钮里，加了“复制”按钮">
+      <option name="closed" value="true" />
+      <created>1729515056282</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1729515056282</updated>
+    </task>
+    <task id="LOCAL-00026" summary="更正了一些文件的写入规范">
+      <option name="closed" value="true" />
+      <created>1729587936930</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1729587936930</updated>
+    </task>
+    <task id="LOCAL-00027" summary="删除了一些无用代码">
+      <option name="closed" value="true" />
+      <created>1729596148279</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1729596148279</updated>
+    </task>
+    <task id="LOCAL-00028" summary="更新了readme，">
+      <option name="closed" value="true" />
+      <created>1729741420743</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1729741420743</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="加了暂时签名，但是链接不上服务器了" />
+    <MESSAGE value="加了暂时签名，也连上了服务器（记得IP地址是否正确" />
+    <MESSAGE value="加了一些SM2的配置，把gradle的版本降低了" />
+    <MESSAGE value="在发送消息的同时，把公钥和签名同时发送过去，对方可以进行签名的验证" />
+    <MESSAGE value="修改了一下签名验证结果的展示，优化了一下layout界面" />
+    <MESSAGE value="实现了get请求来获取TxID" />
+    <MESSAGE value="实现了post请求来获取TxID" />
+    <MESSAGE value="实现了由TxID获取公钥等方法" />
+    <MESSAGE value="密钥派生成功" />
+    <MESSAGE value="从pub文件读取公钥成功！" />
+    <MESSAGE value="整理了一下项目结构" />
+    <MESSAGE value="改了接口名" />
+    <MESSAGE value="基本功能实现，只差改为双端的" />
+    <MESSAGE value="基本功能实现（还没测两部手机" />
+    <MESSAGE value="两部手机测试成功（记得该电脑上的Address" />
+    <MESSAGE value="改了一点按钮名字，然后加了签名时间检测" />
+    <MESSAGE value="增加了消耗时间的输出" />
+    <MESSAGE value="将耗时放在最上面输出，加了撤销公钥" />
+    <MESSAGE value="将generate函数放在了initial按钮里，加了“复制”按钮" />
+    <MESSAGE value="更正了一些文件的写入规范" />
+    <MESSAGE value="删除了一些无用代码" />
+    <MESSAGE value="更新了readme，" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新了readme，" />
+  </component>
+</project>

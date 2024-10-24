@@ -1,11 +1,11 @@
-package com.example.socketlw;
+package com.example.SM2_CPPA;
 
-import static com.example.socketlw.SM2Utils.SM2Util.SM2_GenerateKeyPair;
-import static com.example.socketlw.SM2Utils.SM2Util.SM2_Sign;
-import static com.example.socketlw.SM2Utils.SM2Util.SM2_Verifysign;
-import static com.example.socketlw.SM2Utils.Update.SM2_Getpkfromsk;
-import static com.example.socketlw.SM2Utils.Update.SM2_PrivateKeyDerive;
-import static com.example.socketlw.SM2Utils.Update.Sm3Hash;
+import static com.example.SM2_CPPA.SM2Utils.SM2Util.SM2_GenerateKeyPair;
+import static com.example.SM2_CPPA.SM2Utils.SM2Util.SM2_Sign;
+import static com.example.SM2_CPPA.SM2Utils.SM2Util.SM2_Verifysign;
+import static com.example.SM2_CPPA.SM2Utils.Update.SM2_Getpkfromsk;
+import static com.example.SM2_CPPA.SM2Utils.Update.SM2_PrivateKeyDerive;
+import static com.example.SM2_CPPA.SM2Utils.Update.Sm3Hash;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -67,12 +67,14 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.socketlw.MainUse.JsonPut;
-import com.example.socketlw.MainUse.MessageHolder;
-import com.example.socketlw.MainUse.MessageInfor;
-import com.example.socketlw.SM2Utils.CertificateGenerator;
-import com.example.socketlw.SM2Utils.Update;
-import com.example.socketlw.SM2Utils.Util;
+import com.example.SM2_CPPA.MainUse.JsonPut;
+import com.example.SM2_CPPA.MainUse.MessageHolder;
+import com.example.SM2_CPPA.MainUse.MessageInfor;
+import com.example.SM2_CPPA.SM2Utils.CertificateGenerator;
+import com.example.SM2_CPPA.SM2Utils.Update;
+import com.example.SM2_CPPA.SM2Utils.Util;
+import com.example.SM2_CPPA.R;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private Handler handler;

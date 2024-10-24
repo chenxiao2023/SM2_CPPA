@@ -1,3 +1,3 @@
 include ':app'
-rootProject.name = "SocketLW"
+rootProject.name = "SM2_CPPA"
 //include ':lib_encryption'

@@ -1,4 +1,4 @@
-package com.example.socketlw.MainUse;
+package com.example.SM2_CPPA.MainUse;
 public class MessageInfor {
     private int ID;
     private String msg;
@@ -8,10 +8,7 @@ public class MessageInfor {
     private byte[] signature;
     private byte[] publicKey;
     private String TxID;
-    /**
-     * 作者 LinOwl
-     * 2021.02.17
-     */
+
     public MessageInfor(String msg, Long time, Long userID, byte[] signature,byte[] publicKey,String TxID,String type) {
         this.msg = msg;
         this.time = time;

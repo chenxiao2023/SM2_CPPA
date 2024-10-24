@@ -1,4 +1,4 @@
-package com.example.socketlw.SM2Utils;
+package com.example.SM2_CPPA.SM2Utils;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
@@ -26,12 +26,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 
-/**
- * @author mtj
- * @date 2021/8/12
- * @desc
- * @email mtjsoft3@gmail.com
- */
+
 class SM2Signer implements Signer, ECConstants {
     private final DSAKCalculator kCalculator;
     private final Digest digest;

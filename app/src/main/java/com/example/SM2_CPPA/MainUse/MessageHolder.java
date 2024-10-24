@@ -1,4 +1,4 @@
-package com.example.socketlw.MainUse;
+package com.example.SM2_CPPA.MainUse;
 
 import android.widget.ImageView;
 import android.widget.TextView;
