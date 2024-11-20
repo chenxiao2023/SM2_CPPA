@@ -22,17 +22,22 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,17 +88,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private AlertDialog.Builder builder;
     private TextView titleview;
     private ListView showmsg;
-    private TextView showres;
+    private TextView showres_sk;
+    private TextView showres_pk;
+    private TextView showres_chain;
+    private TextView showres_keyIndex;
     private EditText sendmsgtext;
     private Button startserver;
     private Button continueserver;
     private Button sendmsgbt;
+    private ImageButton plusButton;
+    private LinearLayout certLayout;
+    private LinearLayout showButton;
     private Button mapgettxid;
     private Button getpkcert;
     private Button InitialUser;
     private Button updateSk;
     private Button verifysign;
     private Button showFile;
+
+    private ImageView expand_button_sk;
+    private boolean isExpanded1 = false;
 
     private int StartPort;
     private boolean isContinue = true,isServer = false;
@@ -128,16 +142,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private long endTime;
 
     //初始化用户
-    private  String urlinitialPK = "http://192.168.220.20:8080/InitialUser";
-    //签名方取TxID
-    private  String urlTxID =  "http://192.168.220.20:8080/getTxID";
+    private  String urlinitialPK = "http://110.41.188.6:8080/InitialUser";
+    //签名方取TxID，192.168.220.20
+    private  String urlTxID =  "http://110.41.188.6:8080/getTxID";
     //验证方从TxID取公钥
-    private  String urlTxID2PublicKey = "http://192.168.220.20:8080/getPublickey";
+    private  String urlTxID2PublicKey = "http://110.41.188.6:8080/getPublickey";
 
     private String pkHash = "";
 
-   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
-    //private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
+   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
+    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
 
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请
@@ -164,22 +178,113 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
 
+        ImageButton moreButton = findViewById(R.id.moreButton);
+        moreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupWindow(v);
+            }
+        });
         //清空文件内容
         clearFileOnStartup();
+    }
+
+    //显示菜单函数
+    private void showPopupWindow(View anchorView) {
+        final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_buttons, null);
+
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true;
+
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.showAsDropDown(anchorView, 0, 0);
+
+        Button startServerButton = popupView.findViewById(R.id.startserver);
+        Button continueServerButton = popupView.findViewById(R.id.continueserver);
+
+        startServerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //加载布局
+                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                layout = inflater.inflate(R.layout.start_server,null);
+                //通过对 AlertDialog.Builder 对象调用 setView()
+                builder =  new AlertDialog.Builder(MainActivity.this);
+                builder.setView(R.layout.start_server);
+                builder.setCancelable(false);//是否为可取消
+                //加载控件
+                EditText editprot = (EditText) layout.findViewById(R.id.editprot);
+
+                new AlertDialog.Builder(MainActivity.this)
+                        .setView(layout)  //设置显示内容
+                        .setPositiveButton("开启", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                StartPort = Integer.valueOf(editprot.getText().toString());
+                                mID = System.currentTimeMillis();
+                                ServerInit();
+                            }
+                        })
+                        .setNegativeButton("取消", null)
+                        .setCancelable(false)  //按回退键不可取消该对话框
+                        .show();
+                popupWindow.dismiss();
+            }
+        });
+
+        continueServerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 处理连接服务器按钮点击事件
+                //加载布局
+                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                layout = inflater.inflate(R.layout.continue_server,null);
+                //通过对 AlertDialog.Builder 对象调用 setView()
+                builder =  new AlertDialog.Builder(MainActivity.this);
+                builder.setView(R.layout.continue_server);
+                builder.setCancelable(false);//是否为可取消
+                //加载控件
+                EditText editipv4text = (EditText) layout.findViewById(R.id.editipv4text);
+                EditText editprottext = (EditText) layout.findViewById(R.id.editprottext);
+
+                new AlertDialog.Builder(MainActivity.this)
+                        .setView(layout)  //设置显示内容
+                        .setPositiveButton("连接", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ContinueServerData[0] = editipv4text.getText().toString();
+                                ContinueServerData[1] = editprottext.getText().toString();
+                                ContinueSever();
+                            }
+                        })
+                        .setNegativeButton("取消", null)
+                        .setCancelable(false)  //按回退键不可取消该对话框
+                        .show();
+                popupWindow.dismiss();
+            }
+        });
     }
 
     /**
      * 初始化控件
      */
     private void InitView() {
-        titleview = (TextView) findViewById(R.id.titleview);
+        //titleview = (TextView) findViewById(R.id.titleview);
         showmsg = (ListView) findViewById(R.id.showmsg);
-        showres = (TextView) findViewById(R.id.showres);
-        showres.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
+        showres_sk = (TextView) findViewById(R.id.showres_sk);
+        showres_pk = (TextView) findViewById(R.id.showres_pk);
+        showres_chain = (TextView) findViewById(R.id.showres_chain);
+        showres_keyIndex = (TextView) findViewById(R.id.showres_keyIndex);
+       // showres_sk.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
         sendmsgtext = (EditText) findViewById(R.id.sendmsgtext);
-        startserver = (Button) findViewById(R.id.startserver);
-        continueserver = (Button) findViewById(R.id.continueserver);
+       // startserver = (Button) findViewById(R.id.startserver);
+       // continueserver = (Button) findViewById(R.id.continueserver);
         sendmsgbt = (Button) findViewById(R.id.sendmsgbt);
+        plusButton = (ImageButton) findViewById(R.id.plusButton);
+        certLayout = findViewById(R.id.certLayout);
+        showButton = findViewById(R.id.showButton);
         mapgettxid = (Button) findViewById(R.id.mapgettxid);
         getpkcert = (Button) findViewById(R.id.getpkcert);
         verifysign = (Button) findViewById(R.id.verifysign);
@@ -187,19 +292,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateSk = (Button) findViewById(R.id.updateSk);
         showFile = (Button) findViewById(R.id.showfile);
 
+        expand_button_sk = (ImageView) findViewById(R.id.expand_button_sk);
+
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         messageAdapte = new MessageAdapte();
         showmsg.setAdapter(messageAdapte);
 
-        startserver.setOnClickListener(this);
-        continueserver.setOnClickListener(this);
+       // startserver.setOnClickListener(this);
+       // continueserver.setOnClickListener(this);
         sendmsgbt.setOnClickListener(this);
+        plusButton.setOnClickListener(this);
         mapgettxid.setOnClickListener(this);
         getpkcert.setOnClickListener(this);
         verifysign.setOnClickListener(this);
         updateSk.setOnClickListener(this);
         InitialUser.setOnClickListener(this);
         showFile.setOnClickListener(this);
+
+        expand_button_sk.setOnClickListener(this);
 
     }
     //定义判断权限申请的函数，在onCreat中调用就行
@@ -222,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.startserver:
+          /*  case R.id.startserver:
                 //加载布局
                 inflater = LayoutInflater.from(this);
                 layout = inflater.inflate(R.layout.start_server,null);
@@ -274,6 +384,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .show();
 
                 break;
+
+           */
             case R.id.sendmsgbt://发送消息
                 if(isServer)//服务器
                 {
@@ -313,9 +425,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     datas.add(new MessageInfor(message,Ltimes,mID,sign,publicKeySM2,TxID,"1"));
                     sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
-                    showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+                    //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                    showres_chain.setText(chain);
+                    showres_keyIndex.setText(String.valueOf(keyIndex));
+
                 }else {//客户端
                     sendMsgText();
+                }
+                break;
+            case R.id.plusButton://发送Address获取TxID
+                // 切换底部弹出界面的显示状态
+                if (certLayout.getVisibility() == View.GONE) {
+                    certLayout.setVisibility(View.VISIBLE);
+                    showButton.setVisibility(View.VISIBLE);
+                }else{
+                    certLayout.setVisibility(View.GONE);
+                    showButton.setVisibility(View.GONE);
                 }
                 break;
             case R.id.mapgettxid://发送Address获取TxID
@@ -348,20 +475,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }*/
                 if(verifySign){
                     System.out.println("签名验证成功");
-                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
+                    //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
+                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                    showres_chain.setText(chain);
+                    showres_keyIndex.setText(String.valueOf(keyIndex));
                     writeToInternalStorage("----------SM2_VerifySign---------");
                     writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
                     writeToInternalStorage("\n");
-                    //showres.setTextColor(Color.GREEN);
+                    //showres_sk.setTextColor(Color.GREEN);
                 }else{
                     System.out.println("签名验证失败");
-                    showres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
+                    //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
+                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                    showres_chain.setText(chain);
+                    showres_keyIndex.setText(String.valueOf(keyIndex));
                     writeToInternalStorage("----------SM2_VerifySign---------");
                     writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
                     writeToInternalStorage("\n");
-                    // showres.setTextColor(Color.RED);
+                    // showres_sk.setTextColor(Color.RED);
                 }
                 break;
             case R.id.updateSk://更新私钥
@@ -387,7 +522,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 writeToInternalStorage("keyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
                 writeToInternalStorage("\n");
 
-                showres.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                //showres_sk.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                showres_chain.setText(chain);
+                showres_keyIndex.setText(String.valueOf(keyIndex));
                 /*//函数时间测试
                     for(int i=0;i<12;i++){
                         long startTime = System.nanoTime();
@@ -402,6 +541,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.showfile://展示日志
                 showFileContentDialog();
+                break;
+            case R.id.expand_button_sk://展示日志
+                if (isExpanded1) {
+                    showres_sk.setMaxLines(1);
+                    ((ImageView) view).setImageResource(R.drawable.ic_expand_more);
+                } else {
+                    showres_sk.setMaxLines(Integer.MAX_VALUE);
+                    expandTextViewToFitContent(showres_sk);
+                    ((ImageView) view).setImageResource(R.drawable.ic_expand_less);
+                }
+                isExpanded1 = !isExpanded1;
                 break;
             default:
         }
@@ -505,7 +655,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         datas.add(new MessageInfor(json.getString("msg"),Long.valueOf(json.getString("times")),Long.valueOf(json.getString("id")),Base64.decode(base64Signature, Base64.NO_WRAP),Base64.decode(base64PublicKey, Base64.NO_WRAP),String.valueOf(json.getString("TxID")),"1"));
                         //titletext = json.getString("peoplen");
                         handler.sendEmptyMessage(1);
-                        showres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        //showres_sk.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                        showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                        showres_chain.setText(chain);
+                        showres_keyIndex.setText(String.valueOf(keyIndex));
                         TxIDres=json.getString("TxID");
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
@@ -617,7 +771,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Msgres=json.getString("msg");
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
                         handler.sendEmptyMessage(1);
-                        showres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        //.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                        showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                        showres_chain.setText(chain);
+                        showres_keyIndex.setText(String.valueOf(keyIndex));
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
@@ -650,7 +808,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         writeToInternalStorage("SM2_Sign duration:"+duration+"ms");
         writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
         writeToInternalStorage("\n");
-        showres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+        //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+        showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+        showres_chain.setText(chain);
+        showres_keyIndex.setText(String.valueOf(keyIndex));
         /*//函数时间测试
         for(int i=0;i<12;i++){
             long startTime = System.nanoTime();
@@ -677,7 +839,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("测试PostOne", "url = " + url);
                         Log.d("测试PostOne", "response =" + response);
                         switch (url){
-                            case "http://192.168.220.20:8080/getTxID"://返回时间
+                            case "http://110.41.188.6:8080/getTxID"://返回时间
                                 JSONObject jsonObject = null;
                                 try {
                                     jsonObject = new JSONObject(response);
@@ -685,12 +847,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     String txid = jsonObject.getString("txid");
                                     TxID=txid;
                                     if(txid.equals("")){
-                                        showres.setText("publicKey not found");
+                                        //showres_sk.setText("publicKey not found");
+                                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                        showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                                        showres_chain.setText(chain);
+                                        showres_keyIndex.setText(String.valueOf(keyIndex));
                                         writeToInternalStorage("--------------GetTxID------------");
                                         writeToInternalStorage("publicKey not found");
                                         writeToInternalStorage("\n");
                                     }else{
-                                        showres.setText("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
+                                        //showres_sk.setText("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
+                                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                        showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                                        showres_chain.setText(chain);
+                                        showres_keyIndex.setText(String.valueOf(keyIndex));
                                         writeToInternalStorage("--------------GetTxID------------");
                                         writeToInternalStorage("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
                                         writeToInternalStorage("\n");
@@ -699,14 +869,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     throw new RuntimeException(e);
                                 }
                                 break;
-                            case "http://192.168.220.20:8080/getPublickey"://返回时间
+                            case "http://110.41.188.6:8080/getPublickey"://返回时间
                                 try {
                                     jsonObject = new JSONObject(response);
                                     String runtime = jsonObject.getString("runtime");
                                     String publicKey = jsonObject.getString("publicKey");
                                     String transaction = jsonObject.getString("transaction");
                                     publicKeySM2InCert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(publicKey));
-                                    showres.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
+                                    //showres_sk.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
+                                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                    showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                                    showres_chain.setText(chain);
+                                    showres_keyIndex.setText(String.valueOf(keyIndex));
                                     writeToInternalStorage("---------Get_Publickey--------");
                                     writeToInternalStorage("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
                                     writeToInternalStorage("\n");
@@ -714,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     throw new RuntimeException(e);
                                 }
                                 break;
-                            case "http://192.168.220.20:8080/InitialUser"://返回时间
+                            case "http://110.41.188.6:8080/InitialUser"://返回时间
                                 break;
                             default:
                                 System.out.println("Url错误！！");
@@ -743,14 +917,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 JSONObject jsonObject = new JSONObject();
                 // jsonObject=JsonPut.PutJson(jsonObject,"address","0x4f4072fc87a0833ea924f364e8a2af3546f71279");
                 switch (url){
-                    case "http://192.168.220.20:8080/getTxID":
+                    case "http://110.41.188.6:8080/getTxID":
                         jsonObject= JsonPut.PutJson(jsonObject,"address",address);
                         jsonObject=JsonPut.PutJson(jsonObject,"pkhash",pkHash);
                         break;
-                    case "http://192.168.220.20:8080/getPublickey"://给txID返回证书
+                    case "http://110.41.188.6:8080/getPublickey"://给txID返回证书
+                        jsonObject= JsonPut.PutJson(jsonObject,"address",address);
                         jsonObject=JsonPut.PutJson(jsonObject,"txid",TxIDres);
                         break;
-                    case "http://192.168.220.20:8080/InitialUser":
+                    case "http://110.41.188.6:8080/InitialUser":
                         try {
                             startTime = System.nanoTime();
                             byte[][] key = SM2_GenerateKeyPair();
@@ -769,7 +944,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             privateKeySM2 = key[1];
                             System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
                             System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
-                            showres.setText("SM2_GenerateKeyPair duration:"+duration+"ms"+"\nSM2_publickey="+Util.byte2HexStr(key[0])+"\nSM2_privatekey="+Util.byte2HexStr(key[1])+"\naddress="+address+"\nkeyIndex="+keyIndex+"\nchain="+chain);
+                            //showres_sk.setText("SM2_GenerateKeyPair duration:"+duration+"ms"+"\nSM2_publickey="+Util.byte2HexStr(key[0])+"\nSM2_privatekey="+Util.byte2HexStr(key[1])+"\naddress="+address+"\nkeyIndex="+keyIndex+"\nchain="+chain);
+                            showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                            showres_pk.setText(Util.byte2HexStr(publicKeySM2));
+                            showres_chain.setText(chain);
+                            showres_keyIndex.setText(String.valueOf(keyIndex));
                             writeToInternalStorage("------------InitialUser----------");
                             writeToInternalStorage("SM2_GenerateKeyPair duration:"+duration+"ms");
                             writeToInternalStorage("SM2_publickey="+Util.byte2HexStr(key[0]));
@@ -984,4 +1163,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return stringBuilder.toString();
     }
+
+    private void expandTextViewToFitContent(TextView textView) {
+        // 计算文本内容所需的高度
+        textView.post(new Runnable() {
+            @Override
+            public void run() {
+                Layout layout = textView.getLayout();
+                if (layout != null) {
+                    int height = layout.getLineTop(layout.getLineCount());
+                    ViewGroup.LayoutParams params = textView.getLayoutParams();
+                    params.height = height;
+                    textView.setLayoutParams(params);
+                }
+            }
+        });
+    }
+
 }

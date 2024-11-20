@@ -6,71 +6,299 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <LinearLayout
         android:id="@+id/titleview"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:gravity="center"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/startserver"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/button_broder_bk"
-        android:text="开启服务器"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/continueserver"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/button_broder_bk"
-        android:text="连接服务器"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_height="50dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:background="@drawable/rounded_background2"
+        android:padding="3dp"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
     <TextView
+        android:id="@+id/titleview1"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="40dp"
+        android:textSize="20sp"
+        android:text="User"
+        android:gravity="center"
+        />
+
+    <ImageButton
+        android:id="@+id/moreButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="更多选项"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_more_vert_white_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+
+
+
+
+    <LinearLayout
         android:id="@+id/showres"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:scrollbars="vertical"
-        android:text="展示框"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        />
+        android:layout_height="185dp"
+
+        android:orientation="vertical"
+        android:background="@drawable/border_background"
+        app:layout_constraintBottom_toTopOf="@+id/showmsg"
+        app:layout_constraintTop_toBottomOf="@+id/titleview"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="20dp">
+
+        <!-- 第一个 TextView 和前缀的组合 -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal">
+
+            <!-- 第一个 TextView 的前缀 -->
+            <TextView
+                android:id="@+id/prefix_sk"
+                android:layout_width="85dp"
+                android:layout_height="40dp"
+                android:text="sk"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/rounded_background"
+                android:padding="8dp"
+                android:elevation="2dp" />
+
+            <!-- 第一个 TextView 和展开按钮的组合 -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="85dp"
+                android:background="@drawable/rounded_background_light">
+
+                <!-- 第一个 TextView -->
+                <TextView
+                    android:id="@+id/showres_sk"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollbars="vertical"
+                    android:text="11"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical|start"
+                    android:padding="8dp"
+                    android:elevation="2dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- 展开按钮 -->
+                <ImageView
+                    android:id="@+id/expand_button_sk"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:src="@drawable/ic_expand_more"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="@drawable/rounded_background_light"
+                    android:padding="5dp"
+                    android:elevation="2dp" />
+            </FrameLayout>
+        </FrameLayout>
+            <!-- 第二个 TextView 和前缀的组合 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:orientation="horizontal">
+
+                <!-- 第二个 TextView 的前缀 -->
+                <TextView
+                    android:id="@+id/prefix_pk"
+                    android:layout_width="85dp"
+                    android:layout_height="40dp"
+                    android:text="pk"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:background="@drawable/rounded_background"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+
+                <!-- 第二个 TextView -->
+                <TextView
+                    android:id="@+id/showres_pk"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollbars="vertical"
+                    android:text=""
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical|start"
+                    android:background="@drawable/rounded_background_light"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+            </LinearLayout>
+
+            <!-- 第三个 TextView 和前缀的组合 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:orientation="horizontal">
+
+                <!-- 第三个 TextView 的前缀 -->
+                <TextView
+                    android:id="@+id/prefix_chain"
+                    android:layout_width="85dp"
+                    android:layout_height="40dp"
+                    android:text="chain"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:background="@drawable/rounded_background"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+
+                <!-- 第三个 TextView -->
+                <TextView
+                    android:id="@+id/showres_chain"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollbars="vertical"
+                    android:text=""
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical|start"
+                    android:background="@drawable/rounded_background_light"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+            </LinearLayout>
+
+            <!-- 第四个 TextView 和前缀的组合 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:orientation="horizontal">
+
+                <!-- 第四个 TextView 的前缀 -->
+                <TextView
+                    android:id="@+id/prefix_keyIndex"
+                    android:layout_width="85dp"
+                    android:layout_height="40dp"
+                    android:text="keyIndex"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:background="@drawable/rounded_background"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+
+                <!-- 第四个 TextView -->
+                <TextView
+                    android:id="@+id/showres_keyIndex"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollbars="vertical"
+                    android:text=""
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical|start"
+                    android:background="@drawable/rounded_background_light"
+                    android:padding="8dp"
+                    android:elevation="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
+        android:background="@drawable/rounded_background2"
+        android:padding="3dp"
+        android:elevation="4dp"
         app:layout_constraintBottom_toTopOf="@+id/showButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <EditText
             android:id="@+id/sendmsgtext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:ems="12"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:hint="输入消息..."
+            android:background="@drawable/rounded_edittext_background"
+            android:padding="12dp"
+            android:textColorHint="#AAAAAA"
+            android:textColor="#000000"
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/sendmsgbt"
             android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:text="发送"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/rounded_button_background"
+            android:textSize="16sp" />
+
+        <!-- 加号按钮 -->
+        <ImageButton
+            android:id="@+id/plusButton"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="发送" />
+            android:background="@android:color/transparent"
+            android:minHeight="48dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/add" />
 
     </LinearLayout>
 
@@ -81,6 +309,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/certLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -113,31 +342,31 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/startserver"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
 
-        <Button
-            android:id="@+id/updateSk"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="私钥派生" />
+    <Button
+        android:id="@+id/updateSk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="私钥派生" />
 
-        <Button
-            android:id="@+id/verifysign"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="验证签名" />
-        <Button
-            android:id="@+id/showfile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="显示文件内容" />
-
+    <Button
+        android:id="@+id/verifysign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="验证签名" />
+    <Button
+        android:id="@+id/showfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="显示文件内容" />
 
     </LinearLayout>
 
@@ -145,14 +374,16 @@
         android:id="@+id/showmsg"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:divider="#00000000"
+        android:background="@android:color/white"
+        android:divider="@drawable/list_divider"
+        android:dividerHeight="1dp"
+        android:padding="8dp"
         android:text="客户端"
         android:transcriptMode="alwaysScroll"
-        app:layout_constraintBottom_toTopOf="@+id/showres"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleview"
+        app:layout_constraintTop_toBottomOf="@+id/showres"
         app:layout_constraintVertical_bias="0.0" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

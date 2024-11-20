@@ -1,0 +1,5 @@
+<!-- res/drawable/list_divider.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <size android:height="1dp" />
+    <solid android:color="@android:color/darker_gray" />
+</shape>
