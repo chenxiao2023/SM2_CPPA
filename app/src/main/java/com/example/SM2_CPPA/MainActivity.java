@@ -86,8 +86,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LayoutInflater inflater;
     private View layout;
     private AlertDialog.Builder builder;
-    private TextView titleview;
+    private TextView titleview1;
     private ListView showmsg;
+    private TextView prefix_sk;
+    private TextView show_otherres;
     private TextView showres_sk;
     private TextView showres_pk;
     private TextView showres_chain;
@@ -107,7 +109,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button showFile;
 
     private ImageView expand_button_sk;
+    private ImageView expand_button_pk;
+    private ImageButton moreButton;
+
     private boolean isExpanded1 = false;
+    private boolean isExpanded2 = false;
+    private boolean isExpanded3 = false;
+    private boolean isExpanded4 = false;
 
     private int StartPort;
     private boolean isContinue = true,isServer = false;
@@ -150,8 +158,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String pkHash = "";
 
-   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
-    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
+   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
+  //  private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
 
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请
@@ -170,21 +178,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if(msg.what == 1){
-                    titleview.setText(titletext);
+                    titleview1.setText(titletext);
                 }else if(msg.what == 2){
-                    titleview.setText("当前在线人数["+(allOut.size()+1)+"]");
+                    titleview1.setText("当前在线人数["+(allOut.size()+1)+"]");
                 }
                 super.handleMessage(msg);
             }
         };
 
-        ImageButton moreButton = findViewById(R.id.moreButton);
-        moreButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopupWindow(v);
-            }
-        });
         //清空文件内容
         clearFileOnStartup();
     }
@@ -271,13 +272,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 初始化控件
      */
     private void InitView() {
-        //titleview = (TextView) findViewById(R.id.titleview);
+        titleview1 = (TextView) findViewById(R.id.titleview1);
         showmsg = (ListView) findViewById(R.id.showmsg);
+
+        prefix_sk = (TextView) findViewById(R.id.prefix_sk);
+        show_otherres = (TextView) findViewById(R.id.show_otherres);
+        show_otherres.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
         showres_sk = (TextView) findViewById(R.id.showres_sk);
+        // showres_sk.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
         showres_pk = (TextView) findViewById(R.id.showres_pk);
         showres_chain = (TextView) findViewById(R.id.showres_chain);
         showres_keyIndex = (TextView) findViewById(R.id.showres_keyIndex);
-       // showres_sk.setMovementMethod(new ScrollingMovementMethod());//设置为能划的
         sendmsgtext = (EditText) findViewById(R.id.sendmsgtext);
        // startserver = (Button) findViewById(R.id.startserver);
        // continueserver = (Button) findViewById(R.id.continueserver);
@@ -293,6 +298,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showFile = (Button) findViewById(R.id.showfile);
 
         expand_button_sk = (ImageView) findViewById(R.id.expand_button_sk);
+        expand_button_pk = (ImageView) findViewById(R.id.expand_button_pk);
+        moreButton = (ImageButton)findViewById(R.id.moreButton);
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         messageAdapte = new MessageAdapte();
@@ -310,6 +317,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showFile.setOnClickListener(this);
 
         expand_button_sk.setOnClickListener(this);
+        expand_button_pk.setOnClickListener(this);
+        moreButton.setOnClickListener(this);
+
 
     }
     //定义判断权限申请的函数，在onCreat中调用就行
@@ -426,6 +436,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sendMessage("{\"isimg\":\"1\",\"msg\":\""+message+"\",\"times\":\""+Ltimes+"\",\"id\":\""+mID+"\",\"base64Signature\":\""+base64Signature+"\",\"base64PublicKey\":\""+ base64PublicKey +"\",\"TxID\":\""+TxID+"\",\"peoplen\":\""+"当前在线人数["+(allOut.size()+1)+"]"+"\"}");
                     sendmsgtext.setText("");
                     //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+                    show_otherres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign));
                     showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
@@ -476,6 +487,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(verifySign){
                     System.out.println("签名验证成功");
                     //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
+                    show_otherres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
                     showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
@@ -488,6 +500,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     System.out.println("签名验证失败");
                     //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
+                    show_otherres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
                     showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
@@ -523,6 +536,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 writeToInternalStorage("\n");
 
                 //showres_sk.setText("SM2_PrivateKeyDerive duration:"+duration+"ms"+"\nkeyIndex="+keyIndex+"\nSM2_privateKey="+Util.byte2HexStr(privateKeySM2)+"\nSM2_publicKey="+Util.byte2HexStr(publicKeySM2)+"\nchain="+chain);
+                show_otherres.setText("SM2_PrivateKeyDerive duration:"+duration+"ms");
                 showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                 showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                 showres_chain.setText(chain);
@@ -542,16 +556,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.showfile://展示日志
                 showFileContentDialog();
                 break;
-            case R.id.expand_button_sk://展示日志
-                if (isExpanded1) {
-                    showres_sk.setMaxLines(1);
-                    ((ImageView) view).setImageResource(R.drawable.ic_expand_more);
+            case R.id.expand_button_sk:
+                if (isExpanded1) {//110,145
+                    reduceTextView(showres_sk,view);
                 } else {
-                    showres_sk.setMaxLines(Integer.MAX_VALUE);
-                    expandTextViewToFitContent(showres_sk);
-                    ((ImageView) view).setImageResource(R.drawable.ic_expand_less);
+                    expandTextViewToFitContent(showres_sk,view);
                 }
                 isExpanded1 = !isExpanded1;
+                break;
+            case R.id.expand_button_pk:
+                if (isExpanded2) {//110,145
+                    reduceTextView(showres_pk,view);
+                } else {
+                    expandTextViewToFitContent(showres_pk,view);
+                }
+                isExpanded2 = !isExpanded2;
+                break;
+            case R.id.moreButton:
+                showPopupWindow(view);
                 break;
             default:
         }
@@ -656,6 +678,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //titletext = json.getString("peoplen");
                         handler.sendEmptyMessage(1);
                         //showres_sk.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        show_otherres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
                         showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                         showres_chain.setText(chain);
@@ -771,7 +794,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Msgres=json.getString("msg");
                         Signres=Base64.decode(base64Signature, Base64.NO_WRAP);
                         handler.sendEmptyMessage(1);
-                        //.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        //showres_sk.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
+                        show_otherres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
                         showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                         showres_chain.setText(chain);
@@ -808,7 +832,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         writeToInternalStorage("SM2_Sign duration:"+duration+"ms");
         writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
         writeToInternalStorage("\n");
-        //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+        //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
+        show_otherres.setText("SM2_Sign duration:"+duration+"ms");
         showres_sk.setText(Util.byte2HexStr(privateKeySM2));
         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
         showres_chain.setText(chain);
@@ -848,6 +873,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     TxID=txid;
                                     if(txid.equals("")){
                                         //showres_sk.setText("publicKey not found");
+                                        show_otherres.setText("publicKey not found");
                                         showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                         showres_chain.setText(chain);
@@ -856,13 +882,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         writeToInternalStorage("publicKey not found");
                                         writeToInternalStorage("\n");
                                     }else{
-                                        //showres_sk.setText("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
+                                        //showres_sk.setText("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
+                                        show_otherres.setText("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
                                         showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                         showres_chain.setText(chain);
                                         showres_keyIndex.setText(String.valueOf(keyIndex));
                                         writeToInternalStorage("--------------GetTxID------------");
-                                        writeToInternalStorage("mapPkToTx.get duration:"+runtime+"\ntxid="+txid);
+                                        writeToInternalStorage("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
                                         writeToInternalStorage("\n");
                                     }
                                 } catch (JSONException e) {
@@ -877,6 +904,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     String transaction = jsonObject.getString("transaction");
                                     publicKeySM2InCert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(publicKey));
                                     //showres_sk.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
+                                    show_otherres.setText("Get_PublicKey duration:"+runtime+"\ntransaction="+transaction);
                                     showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                     showres_chain.setText(chain);
@@ -939,12 +967,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 duration = (endTime - startTime) / 1_000_0000.0;
                                 writeToInternalStorage("第"+i+"次生成密钥对耗时="+duration +"ms");
                             } */
+                            keyIndex=0;
                             publicKeySM2 = key[0];
                             pkHash=Util.byte2HexStr(Sm3Hash(publicKeySM2)).toLowerCase();
                             privateKeySM2 = key[1];
                             System.out.println("SM2_Publickey:"+ Util.byte2HexStr(publicKeySM2));
                             System.out.println("SM2_Privatekey:"+Util.byte2HexStr(privateKeySM2));
                             //showres_sk.setText("SM2_GenerateKeyPair duration:"+duration+"ms"+"\nSM2_publickey="+Util.byte2HexStr(key[0])+"\nSM2_privatekey="+Util.byte2HexStr(key[1])+"\naddress="+address+"\nkeyIndex="+keyIndex+"\nchain="+chain);
+                            show_otherres.setText("SM2_GenerateKeyPair duration:"+duration+"ms"+"\naddress="+address);
                             showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                             showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                             showres_chain.setText(chain);
@@ -1164,18 +1194,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return stringBuilder.toString();
     }
 
-    private void expandTextViewToFitContent(TextView textView) {
+    private void expandTextViewToFitContent(TextView textView,View view) {
+        textView.setMaxLines(Integer.MAX_VALUE);
         // 计算文本内容所需的高度
         textView.post(new Runnable() {
             @Override
             public void run() {
+
                 Layout layout = textView.getLayout();
                 if (layout != null) {
                     int height = layout.getLineTop(layout.getLineCount());
                     ViewGroup.LayoutParams params = textView.getLayoutParams();
-                    params.height = height;
+                    params.height = height+55;
+                    Log.d("height=", String.valueOf(height));
                     textView.setLayoutParams(params);
+                    ((ImageView) view).setImageResource(R.drawable.ic_expand_less);
                 }
+            }
+        });
+    }
+
+    private void reduceTextView(TextView textView,View view) {
+        // 计算文本内容所需的高度
+        textView.post(new Runnable() {
+            @Override
+            public void run() {
+                textView.setMaxLines(1);
+                ViewGroup.LayoutParams params = textView.getLayoutParams();
+                ViewGroup.LayoutParams params2 = prefix_sk.getLayoutParams();
+                params.height = params2.height;
+                textView.setLayoutParams(params);
+                ((ImageView) view).setImageResource(R.drawable.ic_expand_more);
             }
         });
     }

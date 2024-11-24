@@ -13,4 +13,6 @@
     <color name="colorNormal">#8A73F5</color>
     <color name="tv_style_color_main">#7A63E5</color>
     <color name="tv_style_color_seconde">#FFFFFF</color>
+
+    <color name="color_JNU">#87B5BD</color>
 </resources>
