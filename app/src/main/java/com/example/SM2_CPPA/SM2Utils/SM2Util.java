@@ -37,7 +37,7 @@ public class SM2Util {
         AsymmetricCipherKeyPair key = SM2.Instance().generateKeyPair();
         ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
         ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
-        BigInteger privateKey = ecpriv.getD();
+        BigInteger privateKey = ecpriv.getD();//d是私钥
         ECPoint publicKey = ecpub.getQ();
         byte[] publicKeyEncoded = publicKey.getEncoded(false);
         if (publicKeyEncoded.length == 65) {

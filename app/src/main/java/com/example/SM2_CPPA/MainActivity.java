@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ImageView expand_button_sk;
     private ImageView expand_button_pk;
+    private ImageView expand_button_chain;
     private ImageButton moreButton;
 
     private boolean isExpanded1 = false;
@@ -158,8 +159,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String pkHash = "";
 
-   private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
-  //  private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
+   //private String address = "0xccdee8c8017f64c686fa39c42f883f363714e078";//地址1
+    private String address = "0x4f4072fc87a0833ea924f364e8a2af3546f71279";//地址2
 
     private static String[] PERMISSIONS_STORAGE = {
             //依次权限申请
@@ -178,9 +179,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if(msg.what == 1){
-                    titleview1.setText(titletext);
+                    //titleview1.setText(titletext);
                 }else if(msg.what == 2){
-                    titleview1.setText("当前在线人数["+(allOut.size()+1)+"]");
+                    //titleview1.setText("当前在线人数["+(allOut.size()+1)+"]");
                 }
                 super.handleMessage(msg);
             }
@@ -299,6 +300,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         expand_button_sk = (ImageView) findViewById(R.id.expand_button_sk);
         expand_button_pk = (ImageView) findViewById(R.id.expand_button_pk);
+        expand_button_chain = (ImageView) findViewById(R.id.expand_button_chain);
+
         moreButton = (ImageButton)findViewById(R.id.moreButton);
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -318,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         expand_button_sk.setOnClickListener(this);
         expand_button_pk.setOnClickListener(this);
+        expand_button_chain.setOnClickListener(this);
         moreButton.setOnClickListener(this);
 
 
@@ -437,10 +441,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sendmsgtext.setText("");
                     //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
                     show_otherres.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(sign));
-                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
-                    showres_keyIndex.setText(String.valueOf(keyIndex));
+                    showres_keyIndex.setText(String.valueOf(keyIndex));*/
 
                 }else {//客户端
                     sendMsgText();
@@ -488,10 +492,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     System.out.println("签名验证成功");
                     //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
                     show_otherres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名通过");
-                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
-                    showres_keyIndex.setText(String.valueOf(keyIndex));
+                    showres_keyIndex.setText(String.valueOf(keyIndex));*/
                     writeToInternalStorage("----------SM2_VerifySign---------");
                     writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名通过");
@@ -501,10 +505,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     System.out.println("签名验证失败");
                     //showres_sk.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
                     show_otherres.setText("SM2_VerifySign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n验证结果="+"签名不通过");
-                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                    /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                     showres_chain.setText(chain);
-                    showres_keyIndex.setText(String.valueOf(keyIndex));
+                    showres_keyIndex.setText(String.valueOf(keyIndex));*/
                     writeToInternalStorage("----------SM2_VerifySign---------");
                     writeToInternalStorage("SM2_VerifySign duration:"+duration+"ms");
                     writeToInternalStorage("SM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Publickey="+Util.byte2HexStr(publicKeySM2InCert)+"\n结果="+"签名不通过");
@@ -571,6 +575,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     expandTextViewToFitContent(showres_pk,view);
                 }
                 isExpanded2 = !isExpanded2;
+                break;
+            case R.id.expand_button_chain:
+                if (isExpanded3) {//110,145
+                    reduceTextView(showres_chain,view);
+                } else {
+                    expandTextViewToFitContent(showres_chain,view);
+                }
+                isExpanded3 = !isExpanded3;
                 break;
             case R.id.moreButton:
                 showPopupWindow(view);
@@ -679,10 +691,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
                         //showres_sk.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
                         show_otherres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
-                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                        /*.setText(Util.byte2HexStr(privateKeySM2));
                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                         showres_chain.setText(chain);
-                        showres_keyIndex.setText(String.valueOf(keyIndex));
+                        showres_keyIndex.setText(String.valueOf(keyIndex));*/
                         TxIDres=json.getString("TxID");
                         Timeres=json.getString("times");
                         Msgres=json.getString("msg");
@@ -796,10 +808,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         handler.sendEmptyMessage(1);
                         //showres_sk.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
                         show_otherres.setText("SM2_Signature="+Util.byte2HexStr(Base64.decode(base64Signature, Base64.NO_WRAP))+"\nTxID="+json.getString("TxID"));
-                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                        /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                         showres_chain.setText(chain);
-                        showres_keyIndex.setText(String.valueOf(keyIndex));
+                        showres_keyIndex.setText(String.valueOf(keyIndex));*/
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
@@ -834,10 +846,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         writeToInternalStorage("\n");
         //showres_sk.setText("SM2_Sign duration:"+duration+"ms"+"\nSM2_Signature="+Util.byte2HexStr(Signres)+"\nSM2_Privatekey="+Util.byte2HexStr(privateKeySM2));
         show_otherres.setText("SM2_Sign duration:"+duration+"ms");
-        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+        /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
         showres_chain.setText(chain);
-        showres_keyIndex.setText(String.valueOf(keyIndex));
+        showres_keyIndex.setText(String.valueOf(keyIndex));*/
         /*//函数时间测试
         for(int i=0;i<12;i++){
             long startTime = System.nanoTime();
@@ -874,20 +886,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     if(txid.equals("")){
                                         //showres_sk.setText("publicKey not found");
                                         show_otherres.setText("publicKey not found");
-                                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                        /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                         showres_chain.setText(chain);
-                                        showres_keyIndex.setText(String.valueOf(keyIndex));
+                                        showres_keyIndex.setText(String.valueOf(keyIndex));*/
                                         writeToInternalStorage("--------------GetTxID------------");
                                         writeToInternalStorage("publicKey not found");
                                         writeToInternalStorage("\n");
                                     }else{
                                         //showres_sk.setText("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
                                         show_otherres.setText("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
-                                        showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                        /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                         showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                         showres_chain.setText(chain);
-                                        showres_keyIndex.setText(String.valueOf(keyIndex));
+                                        showres_keyIndex.setText(String.valueOf(keyIndex));*/
                                         writeToInternalStorage("--------------GetTxID------------");
                                         writeToInternalStorage("mapPkToTx.get duration:"+runtime+"\nTxID="+txid);
                                         writeToInternalStorage("\n");
@@ -905,10 +917,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     publicKeySM2InCert=Util.hexStr2Bytes(CertificateGenerator.verifyCert(publicKey));
                                     //showres_sk.setText("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
                                     show_otherres.setText("Get_PublicKey duration:"+runtime+"\ntransaction="+transaction);
-                                    showres_sk.setText(Util.byte2HexStr(privateKeySM2));
+                                    /*showres_sk.setText(Util.byte2HexStr(privateKeySM2));
                                     showres_pk.setText(Util.byte2HexStr(publicKeySM2));
                                     showres_chain.setText(chain);
-                                    showres_keyIndex.setText(String.valueOf(keyIndex));
+                                    showres_keyIndex.setText(String.valueOf(keyIndex));*/
                                     writeToInternalStorage("---------Get_Publickey--------");
                                     writeToInternalStorage("Get_PublicKey duration:"+runtime+"\npublicKey="+Util.byte2HexStr(publicKeySM2InCert)+"\ntransaction="+transaction);
                                     writeToInternalStorage("\n");
